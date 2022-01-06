@@ -1,0 +1,41 @@
+fn main(){
+  let a = 5;
+  export b = 3;
+  let person = "John";
+  let people = ["John", "Peter"];
+
+/*  a = 10;
+
+  printf(math(a + b));
+
+  if (a < 10) {
+    printf("Larger than 10");
+  }
+
+  for (a; 0, 5, 1) {
+    printf(a);
+  }
+
+  foreach (word in ["hello", "world"]) {
+    printf(word);
+  }
+
+  let x = 0;
+  while (x < 10) {
+    printf(x);
+  }
+
+  foreach (person in people) { printf(person); }
+
+  fn hello(name, age) {
+    printf("Hello " + name + " aged " + age);
+  }
+
+  hello("John", 25);
+
+  if (1) {
+    printf("non empty");
+  }*/
+}
+
+main();
