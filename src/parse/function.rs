@@ -34,7 +34,15 @@ pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
 
   check_token(ph, &[TokenType::LParen])?;
 
-  let params_raw = load_until_closing(ph);
+  while let Some(param) = ph.get(0) {
+    if let TokenType::Identifier(name) = token {
+      params.push(name);
+    } else {
+      return Err(Error::unexpected(token));
+    }
+    
+    
+  }
 
   check_token(ph, &[TokenType::RParen])?;
 
