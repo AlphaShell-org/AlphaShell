@@ -1,13 +1,13 @@
-use super::{error::{Error, Result},node::Node, parse_helper::ParseHelper};
+use super::{error::ParserResult, node::Node, parse_helper::ParseHelper};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Expression {
-  pub left: Option<Box<Node>>,
-  pub operator: Option<Box<Node>>,
-  pub right: Option<Box<Node>>,
+  left: Box<Node>,
+  operator: Box<Node>,
+  right: Box<Node>,
 }
 
-pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   println!("ph: {:?}", ph);
   unimplemented_f!("Not implemented")
 }

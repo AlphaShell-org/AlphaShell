@@ -1,11 +1,51 @@
-use super::{error::{Error, Result},node::Node, parse_helper::ParseHelper};
+use crate::{check_token, types::TokenType};
+
+use super::{
+  error::{Error, ParserResult},
+  node::Node,
+  parse_helper::ParseHelper,
+};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Import {
-  pub files: Vec<String>,
+  files: Vec<Node>,
 }
 
-pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
-  println!("ph: {:?}", ph);
-  unimplemented_f!("Not implemented")
+impl Import {
+  pub fn new(files: Vec<Node>) -> Self {
+    Self { files }
+  }
+}
+
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  check_token!(ph, TokenType::Import);
+  ph.advance();
+
+  let mut files = Vec::new();
+
+  while let Some(param) = ph.peak(0) {
+    if let TokenType::String(string) = param {
+      files.push(Node::String(string.clone()));
+    } else if param == &TokenType::RParen {
+      break;
+    } else {
+      return Err(Error::unexpected(ph.get(0).unwrap()));
+    }
+
+    ph.advance();
+
+    if let Some(token) = ph.peak(0) {
+      match token {
+        TokenType::Comma => ph.advance(),
+        TokenType::Semicolon => break,
+        _ => return Err(Error::unexpected(ph.get(0).unwrap())),
+      }
+    } else {
+      return Err(Error::end());
+    }
+  }
+
+  let import = Node::Import(Import::new(files));
+
+  Ok(import)
 }

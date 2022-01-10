@@ -313,6 +313,7 @@ fn load_operator(state: &mut State) -> Result<Token> {
         TokenType::Daemon
       }
     }
+    '$' => TokenType::Dollar,
     '?' => TokenType::Question,
     ',' => TokenType::Comma,
     ':' => TokenType::Colon,

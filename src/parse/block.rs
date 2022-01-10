@@ -1,15 +1,36 @@
+use crate::{check_token, types::TokenType};
+
 use super::{
-  error::{Error, Result},
+  error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
 };
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Block {
-  pub body: Vec<Node>,
-}
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  check_token!(ph, TokenType::LBrace);
 
-pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
-  println!("ph: {:?}", ph);
-  unimplemented_f!("Not implemented")
+  ph.advance();
+
+  let mut tmp = Vec::new();
+  let mut braces_level = 1;
+
+  while let Some(token) = ph.get(0) {
+    match token.r#type {
+      TokenType::LBrace => braces_level += 1,
+      TokenType::RBrace => braces_level -= 1,
+      _ => {}
+    }
+
+    if braces_level == 0 {
+      let body = super::parse(&tmp)?;
+      let block = Node::Block(body);
+      return Ok(block);
+    }
+
+    tmp.push(token.clone());
+
+    ph.advance();
+  }
+
+  Err(Error::end())
 }

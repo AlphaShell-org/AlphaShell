@@ -1,7 +1,7 @@
 use crate::types::{Position, Token};
 use std::fmt;
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type ParserResult<T> = Result<T, Error>;
 
 #[derive(Debug, Clone)]
 pub struct Error {
@@ -19,6 +19,10 @@ impl Error {
 
   pub fn unexpected(token: &Token) -> Self {
     Self::new(&f!("Unexpected token {token}"), Some(token))
+  }
+
+  pub fn end() -> Error {
+    Self::new(&f!("Unexpected end of input"), None)
   }
 }
 

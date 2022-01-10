@@ -1,22 +1,21 @@
-use crate::types::{Token, TokenType};
+use crate::types::Token;
 
-use super::{
-  error::{Error, Result},
-  parse_helper::ParseHelper,
-};
+use super::parse_helper::ParseHelper;
 
-pub fn check_token(ph: &ParseHelper, valid: &[TokenType]) -> Result<()> {
-  if let Some(token) = ph.peak(1) {
-    if !valid.contains(token) {
-      return Err(Error::unexpected(ph.get(1).unwrap()));
+#[macro_export]
+macro_rules! check_token {
+  ($ph:ident, $(|)? $( $pattern:pat_param )|+ ) => {
+    if let Some(token) = $ph.peak(0) {
+
+      let valid = match token {
+        $( $pattern )|+  => false,
+        _ => true
+      };
+      if valid {
+        return Err(Error::unexpected($ph.get(0).unwrap()));
+      }
+    } else {
+      return Err(Error::new("Unexpected end of input", $ph.get(0)));
     }
-  } else {
-    return Err(Error::new("Unexpected end of input", ph.get(1)));
-  }
-
-  Ok(())
-}
-
-pub fn load_until_closing(ph: &mut ParseHelper) -> Vec<Token> {
-  unimplemented!()
+  };
 }

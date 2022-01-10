@@ -1,41 +1,30 @@
 use crate::types::TokenType;
 
 use super::{
-  block::Block,
-  expression::Expression,
-  function::Function,
-  import::Import,
-  number::{Float, Int},
-  string::Str,
+  expression::Expression, function::Function, function_call::FunctionCall, import::Import,
+  var::Declaration,
 };
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Operator {
-  r#type: TokenType,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Identifier {
-  r#type: String,
-}
-
-#[derive(Debug, PartialEq, Clone)]
 pub enum Node {
-  Identifier(Identifier),
-  Operator(Operator),
-  String(Str),
-  Int(Int),
-  Float(Float),
+  Identifier(String),
+  Operator(TokenType),
+  String(String),
+  Int(i64),
+  Float(f64),
   Expression(Expression),
+  Array(Vec<String>),
+  Map,
   Import(Import),
-  Block(Block),
+  Block(Vec<Node>),
   Function(Function),
+  FunctionCall(FunctionCall),
+  Declaration(Declaration),
   IndexCall,
   If,
   For,
   While,
-  Return,
+  Return(Option<u8>),
   Continue,
   Break,
-  Array,
 }

@@ -1,22 +1,31 @@
-use crate::types::TokenType;
+use crate::{check_token, types::TokenType};
 
 use super::{
   block::{self},
-  error::{Error, Result},
+  error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
-  utils::{check_token, load_until_closing},
 };
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
-  pub name: String,
-  pub params: Vec<Node>,
-  pub block: Box<Node>,
+  name: String,
+  params: Vec<Node>,
+  block: Box<Node>,
 }
 
-pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
-  let params = Vec::new();
+impl Function {
+  pub fn new(name: String, params: Vec<Node>, block: Box<Node>) -> Self {
+    Self {
+      name,
+      params,
+      block,
+    }
+  }
+}
+
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  let mut params = Vec::new();
 
   ph.advance();
 
@@ -32,31 +41,39 @@ pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
 
   ph.advance();
 
-  check_token(ph, &[TokenType::LParen])?;
-
-  while let Some(param) = ph.get(0) {
-    if let TokenType::Identifier(name) = token {
-      params.push(name);
-    } else {
-      return Err(Error::unexpected(token));
-    }
-    
-    
-  }
-
-  check_token(ph, &[TokenType::RParen])?;
+  check_token!(ph, TokenType::LParen);
 
   ph.advance();
 
-  check_token(ph, &[TokenType::LBrace])?;
+  while let Some(param) = ph.peak(0) {
+    if let TokenType::Identifier(name) = param {
+      params.push(Node::Identifier(name.clone()));
+    } else if param == &TokenType::RParen {
+      break;
+    } else {
+      return Err(Error::unexpected(ph.get(0).unwrap()));
+    }
+
+    ph.advance();
+
+    if let Some(token) = ph.peak(0) {
+      match token {
+        TokenType::Comma => ph.advance(),
+        TokenType::RParen => break,
+        _ => return Err(Error::unexpected(ph.get(0).unwrap())),
+      }
+    } else {
+      return Err(Error::end());
+    }
+  }
+
+  check_token!(ph, TokenType::RParen);
+
+  ph.advance();
 
   let block = block::parse(ph)?;
 
-  let node = Node::Function(Function {
-    name,
-    params,
-    block: Box::new(block),
-  });
+  let node = Node::Function(Function::new(name, params, Box::new(block)));
 
   Ok(node)
 }

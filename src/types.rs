@@ -89,6 +89,8 @@ pub enum TokenType {
   Question,
   Colon, // :
 
+  Dollar,
+
   // Separators
   Dot,
   Range, //..
