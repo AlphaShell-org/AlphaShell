@@ -2,7 +2,7 @@ use crate::types::TokenType;
 
 use super::{
   expression::Expression, function::Function, function_call::FunctionCall, import::Import,
-  var::Declaration,
+  var::Declaration, r#if::If
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -14,14 +14,14 @@ pub enum Node {
   Float(f64),
   Expression(Expression),
   Array(Vec<String>),
-  Map,
+  Map(Vec<(String, String)>),
   Import(Import),
   Block(Vec<Node>),
   Function(Function),
   FunctionCall(FunctionCall),
   Declaration(Declaration),
   IndexCall,
-  If,
+  If(If),
   For,
   While,
   Return(Option<u8>),

@@ -1,6 +1,6 @@
 use crate::types::{Token, TokenType};
 
-use super::node::Node;
+use super::{node::Node, error::{Result, Error}};
 
 #[derive(Debug)]
 pub struct ParseHelper {
@@ -21,9 +21,7 @@ impl ParseHelper {
   pub fn get(&self, offset: i32) -> Option<&Token> {
     let i = self.index as i32 + offset;
 
-    if i < 0 {
-      return None;
-    }
+   if i < 0 { return None; }
 
     self.tokens.get(i as usize)
   }
@@ -31,9 +29,7 @@ impl ParseHelper {
   pub fn peak(&self, offset: i32) -> Option<&TokenType> {
     let i = self.index as i32 + offset;
 
-    if i < 0 {
-      return None;
-    }
+    if i < 0 { return None; }
 
     self.tokens.get(i as usize).map(|token| &token.r#type)
   }
