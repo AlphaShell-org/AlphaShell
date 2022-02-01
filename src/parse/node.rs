@@ -1,8 +1,13 @@
 use crate::types::TokenType;
 
 use super::{
-  expression::Expression, function::Function, function_call::FunctionCall, import::Import,
-  var::Declaration, r#if::If
+  expression::Expression,
+  function::Function,
+  function_call::FunctionCall,
+  import::Import,
+  r#for::{For, Foreach},
+  r#if::If,
+  var::Declaration,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -22,8 +27,9 @@ pub enum Node {
   Declaration(Declaration),
   IndexCall,
   If(If),
-  For,
-  While,
+  For(For),
+  Foreach(Foreach),
+  While(),
   Return(Option<u8>),
   Continue,
   Break,

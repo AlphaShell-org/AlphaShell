@@ -28,7 +28,7 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
 
   let mut ph = ParseHelper::new(tokens.to_vec());
 
-  while let Some(token) = ph.peak(0) {
+  while let Some(token) = ph.peek(0) {
     let node = match token {
       Import => import::parse(&mut ph),
       Function => r#function::parse(&mut ph),
@@ -42,7 +42,7 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
       Break => Ok(Node::Break),
 
       Identifier(..) => {
-        if let Some(next) = ph.peak(1) {
+        if let Some(next) = ph.peek(1) {
           match next {
             LParen => function_call::parse(&mut ph),
             _ => expression::parse(&mut ph),

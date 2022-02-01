@@ -1,20 +1,21 @@
 import "another_folder/file.zjs"; // translates to "source another_folder/file.zjs"
 
+/*
 let a = 5;
 export b = 3;
 let person = "John";
-let people = ["John", "Peter"];
-let map = { foo: "bar" }; // dict
+let people = ["John", "Peter"]; // array
+let map = { foo: "bar" }; // associative array (dict)
 
 a = 10;
 
 printf(a);
 printf(people[0]);
 printf(map["foo"]);
-printf(math(a + b)); // interpret + as arithmetic instead of concatenation
+printf($(a + b)); // interpret + as arithmetic instead of concatenation
 
 if a <= 10 { printf("Larger than 10"); }
-
+*/
 for a in 0..5..1 { printf(a); } // start..end..step
 for word in ["hello", "world"] { printf(word); }
 for person in people { printf(person); }
@@ -22,12 +23,14 @@ for person in people { printf(person); }
 let x = 0;
 while x < 10 { printf(x); }
 
-fn hello(name, age) { printf(f"Hello {name} aged {age}"); }
+fn hello(name, age) {
+  printf(f"Hello {name} aged {age}");
+}
 
 hello("John", 25) | wc(); // pipe output
 
-fn array(...) { // collect parameters into array
-  for a in $ { // $ is args array
+fn array() {
+  for a in @ { // $ is args array
     a | sed("s/foo/bar") // pipe value
   }
   return 0;

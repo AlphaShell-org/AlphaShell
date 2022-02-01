@@ -90,6 +90,7 @@ pub enum TokenType {
   Colon, // :
 
   Dollar,
+  At,
 
   // Separators
   Dot,

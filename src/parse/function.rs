@@ -29,7 +29,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let name = if let Some(token) = ph.peak(0) {
+  let name = if let Some(token) = ph.peek(0) {
     if let TokenType::Identifier(name) = token {
       name.clone()
     } else {
@@ -45,7 +45,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  while let Some(param) = ph.peak(0) {
+  while let Some(param) = ph.peek(0) {
     if let TokenType::Identifier(name) = param {
       params.push(Node::Identifier(name.clone()));
     } else if param == &TokenType::RParen {
@@ -56,7 +56,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
     ph.advance();
 
-    if let Some(token) = ph.peak(0) {
+    if let Some(token) = ph.peek(0) {
       match token {
         TokenType::Comma => ph.advance(),
         TokenType::RParen => break,

@@ -23,7 +23,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   let mut files = Vec::new();
 
-  while let Some(param) = ph.peak(0) {
+  while let Some(param) = ph.peek(0) {
     if let TokenType::String(string) = param {
       files.push(Node::String(string.clone()));
     } else if param == &TokenType::RParen {
@@ -34,7 +34,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
     ph.advance();
 
-    if let Some(token) = ph.peak(0) {
+    if let Some(token) = ph.peek(0) {
       match token {
         TokenType::Comma => ph.advance(),
         TokenType::Semicolon => break,

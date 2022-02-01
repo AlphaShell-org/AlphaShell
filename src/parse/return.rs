@@ -6,7 +6,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TokenType::Return);
   ph.advance();
 
-  let value = if let Some(TokenType::Integer(int)) = ph.peak(0) {
+  let value = if let Some(TokenType::Integer(int)) = ph.peek(0) {
     let int = if *int >= 0 && *int < 256 {
       *int as u8
     } else {

@@ -1,11 +1,7 @@
-use crate::types::Token;
-
-use super::parse_helper::ParseHelper;
-
 #[macro_export]
 macro_rules! check_token {
   ($ph:ident, $(|)? $( $pattern:pat_param )|+ ) => {
-    if let Some(token) = $ph.peak(0) {
+    if let Some(token) = $ph.peek(0) {
 
       let valid = match token {
         $( $pattern )|+  => false,

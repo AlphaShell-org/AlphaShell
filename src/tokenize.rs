@@ -314,6 +314,7 @@ fn load_operator(state: &mut State) -> Result<Token> {
       }
     }
     '$' => TokenType::Dollar,
+    '@' => TokenType::At,
     '?' => TokenType::Question,
     ',' => TokenType::Comma,
     ':' => TokenType::Colon,

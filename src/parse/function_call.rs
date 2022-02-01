@@ -28,7 +28,7 @@ impl FunctionCall {
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TokenType::Identifier(..));
 
-  let name = if let Some(token) = ph.peak(0) {
+  let name = if let Some(token) = ph.peek(0) {
     match token {
       TokenType::Identifier(name) => name.clone(),
       _ => return Err(Error::unexpected(ph.get(0).unwrap())),
@@ -45,7 +45,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   let mut args = vec![];
 
-  while let Some(arg) = ph.peak(0) {
+  while let Some(arg) = ph.peek(0) {
     if arg == &TokenType::RParen {
       break;
     }
@@ -54,7 +54,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
     args.push(arg);
 
-    if let Some(token) = ph.peak(0) {
+    if let Some(token) = ph.peek(0) {
       match token {
         TokenType::Comma => ph.advance(),
         TokenType::RParen => break,
@@ -69,10 +69,10 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let next = if let Some(TokenType::Pipe) = ph.peak(0) {
+  let next = if let Some(TokenType::Pipe) = ph.peek(0) {
     ph.advance();
 
-    if let Some(TokenType::String(string)) = ph.peak(0) {
+    if let Some(TokenType::String(string)) = ph.peek(0) {
       Some(Box::new(Node::String(string.clone()))) // redirect to file
     } else {
       Some(Box::new(parse(ph)?))
@@ -81,7 +81,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     None
   };
 
-  let is_daemon = matches!(ph.peak(0), Some(TokenType::Daemon));
+  let is_daemon = matches!(ph.peek(0), Some(TokenType::Daemon));
 
   if is_daemon {
     ph.advance();
