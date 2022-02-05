@@ -1,26 +1,18 @@
-use crate::types::TokenType;
-
 use super::{
-  expression::Expression,
   function::Function,
   function_call::FunctionCall,
-  import::Import,
   r#for::{For, Foreach},
   r#if::If,
+  value::Value,
   var::Declaration,
 };
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
-  Identifier(String),
-  Operator(TokenType),
-  String(String),
-  Int(i64),
-  Float(f64),
-  Expression(Expression),
-  Array(Vec<String>),
-  Map(Vec<(String, String)>),
-  Import(Import),
+  Value(Value),
+
+  Import(Vec<String>),
+  ImportedCode(Vec<Node>),
   Block(Vec<Node>),
   Function(Function),
   FunctionCall(FunctionCall),
@@ -30,7 +22,13 @@ pub enum Node {
   For(For),
   Foreach(Foreach),
   While(),
-  Return(Option<u8>),
+  Return(u8),
   Continue,
   Break,
+}
+
+impl std::fmt::Display for Node {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "{self:?}")
+  }
 }

@@ -1,4 +1,6 @@
-use crate::{check_token, types::TokenType};
+use std::path::Path;
+
+use crate::{check_token, types::TT};
 
 use super::{
   error::{Error, ParserResult},
@@ -6,46 +8,57 @@ use super::{
   parse_helper::ParseHelper,
 };
 
-#[derive(Debug, PartialEq, Clone)]
-pub struct Import {
-  files: Vec<Node>,
-}
-
-impl Import {
-  pub fn new(files: Vec<Node>) -> Self {
-    Self { files }
-  }
-}
-
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  check_token!(ph, TokenType::Import);
+  check_token!(ph, TT::Import | TT::Source);
+
+  let static_import = ph.peek(0) == Some(&TT::Import);
+
   ph.advance();
 
   let mut files = Vec::new();
 
-  while let Some(param) = ph.peek(0) {
-    if let TokenType::String(string) = param {
-      files.push(Node::String(string.clone()));
-    } else if param == &TokenType::RParen {
-      break;
-    } else {
-      return Err(Error::unexpected(ph.get(0).unwrap()));
-    }
+  loop {
+    match ph.peek(0) {
+      Some(TT::String(string)) => files.push(string.clone()),
+      Some(TT::Semicolon) => break,
+      Some(_) => return Err(Error::unexpected(ph)),
+      None => return Err(Error::end(ph)),
+    };
 
     ph.advance();
 
-    if let Some(token) = ph.peek(0) {
-      match token {
-        TokenType::Comma => ph.advance(),
-        TokenType::Semicolon => break,
-        _ => return Err(Error::unexpected(ph.get(0).unwrap())),
-      }
-    } else {
-      return Err(Error::end());
-    }
+    match ph.peek(0) {
+      Some(TT::Comma) => ph.advance(),
+      Some(TT::Semicolon) => break,
+      Some(_) => return Err(Error::unexpected(ph)),
+      None => return Err(Error::end(ph)),
+    };
   }
 
-  let import = Node::Import(Import::new(files));
+  ph.advance();
 
-  Ok(import)
+  if static_import {
+    let mut imported_trees = vec![];
+    for file in files {
+      let contents = crate::read_file(Path::new(&file));
+
+      let tokens = match crate::tokenize(&contents) {
+        Ok(tokens) => tokens,
+        Err(e) => return Err(Error::new(&e.msg, None)),
+      };
+
+      let tree = match crate::parse(&tokens) {
+        Ok(tree) => tree,
+        Err(e) => return Err(e),
+      };
+
+      imported_trees.push(Node::Block(tree));
+    }
+
+    Ok(Node::ImportedCode(imported_trees))
+  } else {
+    let import = Node::Import(files);
+
+    Ok(import)
+  }
 }

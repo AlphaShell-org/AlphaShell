@@ -1,7 +1,7 @@
 use crate::{
   check_token,
-  parse::{block, error::Error, expression},
-  types::TokenType,
+  parse::{block, error::Error, value},
+  types::TT,
 };
 
 use super::{error::ParserResult, node::Node, parse_helper::ParseHelper};
@@ -27,22 +27,25 @@ impl If {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  check_token!(ph, TokenType::If);
+  check_token!(ph, TT::If);
+
   ph.advance();
 
-  let condition = expression::parse(ph)?;
+  let condition = value::parse(ph)?;
 
-  check_token!(ph, TokenType::LBrace);
+  check_token!(ph, TT::LBrace);
+
   ph.advance();
 
   let block = block::parse(ph)?;
 
-  check_token!(ph, TokenType::RBrace);
+  check_token!(ph, TT::RBrace);
+
   ph.advance();
 
   let r#else = match ph.peek(0) {
-    Some(TokenType::Elif) => Some(Box::new(parse(ph)?)),
-    Some(TokenType::Else) => Some(Box::new(block::parse(ph)?)),
+    Some(TT::Elif) => Some(Box::new(parse(ph)?)),
+    Some(TT::Else) => Some(Box::new(block::parse(ph)?)),
     _ => None,
   };
 

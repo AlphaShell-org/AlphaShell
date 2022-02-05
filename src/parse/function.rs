@@ -1,4 +1,4 @@
-use crate::{check_token, types::TokenType};
+use crate::{check_token, types::TT};
 
 use super::{
   block::{self},
@@ -10,12 +10,12 @@ use super::{
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
   name: String,
-  params: Vec<Node>,
+  params: Vec<String>,
   block: Box<Node>,
 }
 
 impl Function {
-  pub fn new(name: String, params: Vec<Node>, block: Box<Node>) -> Self {
+  pub fn new(name: String, params: Vec<String>, block: Box<Node>) -> Self {
     Self {
       name,
       params,
@@ -29,50 +29,41 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let name = if let Some(token) = ph.peek(0) {
-    if let TokenType::Identifier(name) = token {
-      name.clone()
-    } else {
-      return Err(Error::unexpected(ph.get(0).unwrap()));
-    }
-  } else {
-    return Err(Error::new("Unexpected end of input", ph.get(0)));
+  let name = match ph.peek(0) {
+    Some(TT::Identifier(name)) => name.clone(),
+    Some(_) => return Err(Error::unexpected(ph)),
+    None => return Err(Error::end(ph)),
   };
 
   ph.advance();
 
-  check_token!(ph, TokenType::LParen);
+  check_token!(ph, TT::LParen);
 
   ph.advance();
 
-  while let Some(param) = ph.peek(0) {
-    if let TokenType::Identifier(name) = param {
-      params.push(Node::Identifier(name.clone()));
-    } else if param == &TokenType::RParen {
-      break;
-    } else {
-      return Err(Error::unexpected(ph.get(0).unwrap()));
-    }
+  loop {
+    match ph.peek(0) {
+      Some(TT::Identifier(name)) => params.push(name.clone()),
+      Some(TT::RParen) => break,
+      Some(_) => return Err(Error::unexpected(ph)),
+      None => return Err(Error::end(ph)),
+    };
 
     ph.advance();
 
-    if let Some(token) = ph.peek(0) {
-      match token {
-        TokenType::Comma => ph.advance(),
-        TokenType::RParen => break,
-        _ => return Err(Error::unexpected(ph.get(0).unwrap())),
-      }
-    } else {
-      return Err(Error::end());
-    }
+    match ph.peek(0) {
+      Some(TT::Comma) => ph.advance(),
+      Some(TT::RParen) => break,
+      Some(_) => return Err(Error::unexpected(ph)),
+      None => return Err(Error::end(ph)),
+    };
   }
 
-  check_token!(ph, TokenType::RParen);
+  check_token!(ph, TT::RParen);
 
   ph.advance();
 
   let block = block::parse(ph)?;
-
   let node = Node::Function(Function::new(name, params, Box::new(block)));
 
   Ok(node)

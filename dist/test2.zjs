@@ -1,0 +1,7 @@
+printf("loaded test2");
+
+fn test2() {
+  for i in 0..3 {
+    echo("Hello from test") | lolcat();
+  }
+}

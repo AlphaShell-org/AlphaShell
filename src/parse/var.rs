@@ -1,10 +1,10 @@
-use crate::{check_token, types::TokenType};
+use crate::{check_token, types::TT};
 
 use super::{
   error::{Error, ParserResult},
-  expression,
   node::Node,
   parse_helper::ParseHelper,
+  value,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -15,13 +15,13 @@ pub enum DeclarationType {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Declaration {
-  r#type: DeclarationType,
-  name: Box<Node>,
-  value: Box<Node>,
+  pub r#type: DeclarationType,
+  pub name: String,
+  pub value: Box<Node>,
 }
 
 impl Declaration {
-  pub fn new(r#type: DeclarationType, name: Box<Node>, value: Box<Node>) -> Self {
+  pub fn new(r#type: DeclarationType, name: String, value: Box<Node>) -> Self {
     Self {
       r#type,
       name,
@@ -31,41 +31,36 @@ impl Declaration {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  check_token!(ph, TokenType::Let | TokenType::Export);
+  check_token!(ph, TT::Let | TT::Export);
 
-  let r#type = if let Some(token) = ph.get(0) {
-    match token.r#type {
-      TokenType::Let => DeclarationType::Let,
-      TokenType::Export => DeclarationType::Export,
-      _ => return Err(Error::unexpected(token)),
-    }
-  } else {
-    return Err(Error::end());
+  let r#type = match ph.peek(0) {
+    Some(TT::Let) => DeclarationType::Let,
+    Some(TT::Export) => DeclarationType::Export,
+    Some(_) => return Err(Error::unexpected(ph)),
+    None => return Err(Error::end(ph)),
   };
 
   ph.advance();
 
-  let r#name = if let Some(token) = ph.get(0) {
-    match token.r#type.clone() {
-      TokenType::Identifier(name) => Node::Identifier(name),
-      _ => return Err(Error::unexpected(token)),
-    }
-  } else {
-    return Err(Error::end());
+  let name = match ph.peek(0) {
+    Some(TT::Identifier(name)) => name.clone(),
+    Some(_) => return Err(Error::unexpected(ph)),
+    None => return Err(Error::end(ph)),
   };
 
   ph.advance();
 
-  check_token!(ph, TokenType::Assignment);
+  check_token!(ph, TT::Assignment);
 
   ph.advance();
 
-  let value = expression::parse(ph)?;
+  let value = value::parse(ph)?;
 
-  check_token!(ph, TokenType::Semicolon);
+  check_token!(ph, TT::Semicolon);
+
   ph.advance();
 
-  let declaration = Node::Declaration(Declaration::new(r#type, Box::new(name), Box::new(value)));
+  let declaration = Node::Declaration(Declaration::new(r#type, name, Box::new(value)));
 
   Ok(declaration)
 }

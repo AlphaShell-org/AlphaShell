@@ -1,5 +1,5 @@
 mod error;
-mod node;
+pub mod node;
 mod parse_helper;
 mod utils;
 
@@ -7,30 +7,30 @@ use error::{Error, ParserResult};
 use node::Node;
 use parse_helper::ParseHelper;
 
-mod array;
-mod block;
-mod expression;
-mod r#for;
-mod function;
-mod function_call;
-mod r#if;
-mod import;
-mod map;
-mod r#return;
-mod var;
-mod r#while;
+pub mod array;
+pub mod block;
+pub mod r#for;
+pub mod function;
+pub mod function_call;
+pub mod r#if;
+pub mod import;
+pub mod map;
+pub mod r#return;
+pub mod value;
+pub mod var;
+pub mod r#while;
 
 #[allow(clippy::enum_glob_use)]
 use crate::types::{Token, TokenType::*};
 
 pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
-  println!("Parsing!");
-
   let mut ph = ParseHelper::new(tokens.to_vec());
+
+  let mut tree = vec![];
 
   while let Some(token) = ph.peek(0) {
     let node = match token {
-      Import => import::parse(&mut ph),
+      Import | Source => import::parse(&mut ph),
       Function => r#function::parse(&mut ph),
       Export | Let => var::parse(&mut ph),
       For => r#for::parse(&mut ph),
@@ -45,27 +45,18 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
         if let Some(next) = ph.peek(1) {
           match next {
             LParen => function_call::parse(&mut ph),
-            _ => expression::parse(&mut ph),
+            _ => value::parse(&mut ph),
           }
         } else {
-          return Err(Error::end());
+          return Err(Error::end(&ph));
         }
       }
 
-      _ => {
-        return Err(Error::new(
-          &f!("Token {token} not yet implemented"),
-          ph.get(0),
-        ))
-      }
+      _ => return Err(Error::unexpected(&ph)),
     };
 
-    ph.push_tree(node?);
-
-    ph.advance();
+    tree.push(node?);
   }
 
-  println!("Done parsing");
-
-  Ok(ph.get_tree())
+  Ok(tree)
 }

@@ -1,17 +1,10 @@
 #[macro_export]
 macro_rules! check_token {
   ($ph:ident, $(|)? $( $pattern:pat_param )|+ ) => {
-    if let Some(token) = $ph.peek(0) {
-
-      let valid = match token {
-        $( $pattern )|+  => false,
-        _ => true
-      };
-      if valid {
-        return Err(Error::unexpected($ph.get(0).unwrap()));
-      }
-    } else {
-      return Err(Error::new("Unexpected end of input", $ph.get(0)));
+    match $ph.peek(0) {
+      Some($( $pattern )|+)  => {},
+      Some(_) => return Err(Error::unexpected($ph)),
+      _ => return Err(Error::end($ph))
     }
   };
 }

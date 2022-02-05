@@ -1,6 +1,8 @@
 use crate::types::{Position, Token};
 use std::fmt;
 
+use super::parse_helper::ParseHelper;
+
 pub type ParserResult<T> = Result<T, Error>;
 
 #[derive(Debug, Clone)]
@@ -17,19 +19,37 @@ impl Error {
     }
   }
 
-  pub fn unexpected(token: &Token) -> Self {
+  pub fn unexpected(ph: &ParseHelper) -> Self {
+    let token = ph.get(0).unwrap();
+
+    #[cfg(debug_assertions)]
+    println!(
+      "{}\ncurrent index: {}",
+      ph.pretty_print_tokens(),
+      ph.get_index()
+    );
+
     Self::new(&f!("Unexpected token {token}"), Some(token))
   }
 
-  pub fn end() -> Error {
-    Self::new(&f!("Unexpected end of input"), None)
+  pub fn end(ph: &ParseHelper) -> Error {
+    #[cfg(debug_assertions)]
+    println!(
+      "{}\ncurrent index: {}",
+      ph.pretty_print_tokens(),
+      ph.get_index()
+    );
+
+    let last = ph.get_tokens().last().unwrap();
+
+    Self::new(&f!("Unexpected end of input after {last}"), Some(last))
   }
 }
 
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let Error { msg, token } = self;
-
+    
     if let Some(token) = token {
       let Position(line, column) = token.position;
       let (line, column) = (line + 1, column + 1); // account for zero indexing

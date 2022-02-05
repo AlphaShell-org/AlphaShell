@@ -1,22 +1,23 @@
 mod error;
 
-use super::types::{Position, Token, TokenType};
+use super::types::{Position, Token, TokenType, TT};
 use error::{Error, Result};
 
 static KEYWORDS: phf::Map<&'static str, TokenType> = phf::phf_map! {
-  "let" => TokenType::Let,
-  "export" => TokenType::Export,
-  "import" => TokenType::Import,
-  "fn" => TokenType::Function,
-  "return" => TokenType::Return,
-  "if" => TokenType::If,
-  "elif" => TokenType::Elif,
-  "else" => TokenType::Else,
-  "for" => TokenType::For,
-  "in" => TokenType::In,
-  "while" => TokenType::While,
-  "continue" => TokenType::Continue,
-  "break" => TokenType::Break,
+  "let" => TT::Let,
+  "export" => TT::Export,
+  "import" => TT::Import,
+  "source" => TT::Source,
+  "fn" => TT::Function,
+  "return" => TT::Return,
+  "if" => TT::If,
+  "elif" => TT::Elif,
+  "else" => TT::Else,
+  "for" => TT::For,
+  "in" => TT::In,
+  "while" => TT::While,
+  "continue" => TT::Continue,
+  "break" => TT::Break,
 };
 
 pub struct State<'a> {
@@ -153,10 +154,7 @@ fn load_number(state: &mut State) -> Result<Token> {
         }
 
         if let Ok(num) = buf.parse() {
-          return Ok(Token::new(
-            TokenType::Float(num),
-            Position(state.line, start),
-          ));
+          return Ok(Token::new(TT::Float(num), Position(state.line, start)));
         }
         return Err(Error::new("Invalid number", state));
       }
@@ -169,18 +167,12 @@ fn load_number(state: &mut State) -> Result<Token> {
   match num_type {
     NumType::Float => {
       if let Ok(num) = buf.parse() {
-        return Ok(Token::new(
-          TokenType::Float(num),
-          Position(state.line, start),
-        ));
+        return Ok(Token::new(TT::Float(num), Position(state.line, start)));
       }
     }
     NumType::Int => {
       if let Ok(num) = buf.parse() {
-        return Ok(Token::new(
-          TokenType::Integer(num),
-          Position(state.line, start),
-        ));
+        return Ok(Token::new(TT::Integer(num), Position(state.line, start)));
       }
     }
   };
@@ -230,10 +222,7 @@ fn load_string(state: &mut State) -> Result<Token> {
   // omit ending quote
   state.advance();
 
-  Ok(Token::new(
-    TokenType::String(buf),
-    Position(state.line, start),
-  ))
+  Ok(Token::new(TT::String(buf), Position(state.line, start)))
 }
 
 fn load_operator(state: &mut State) -> Result<Token> {
@@ -245,9 +234,9 @@ fn load_operator(state: &mut State) -> Result<Token> {
       if state.next() == Some('=') {
         state.advance();
 
-        TokenType::$b
+        TT::$b
       } else {
-        TokenType::$a
+        TT::$a
       }
     };
   }
@@ -259,18 +248,18 @@ fn load_operator(state: &mut State) -> Result<Token> {
       if state.next() == Some('=') {
         state.advance();
 
-        TokenType::MultiplyAssignment
+        TT::MultiplyAssignment
       } else if state.next() == Some('*') {
         state.advance();
 
         if state.next() == Some('=') {
           state.advance();
-          TokenType::PowerAssignment
+          TT::PowerAssignment
         } else {
-          TokenType::Power
+          TT::Power
         }
       } else {
-        TokenType::Multiply
+        TT::Multiply
       }
     }
     '/' => operator_with_equal!(Divide, DivideAssignment),
@@ -282,7 +271,7 @@ fn load_operator(state: &mut State) -> Result<Token> {
     '~' => {
       if state.next() == Some('=') {
         state.advance();
-        TokenType::RegexMatch
+        TT::RegexMatch
       } else {
         return Err(Error::new("Unexpected token '~'", state));
       }
@@ -290,41 +279,41 @@ fn load_operator(state: &mut State) -> Result<Token> {
     '.' => {
       if state.next() == Some('.') {
         state.advance();
-        TokenType::Range
+        TT::Range
       } else {
-        TokenType::Dot
+        TT::Dot
       }
     }
     '|' => {
       if state.next() == Some('|') {
         state.advance();
 
-        TokenType::Or
+        TT::Or
       } else {
-        TokenType::Pipe
+        TT::Pipe
       }
     }
     '&' => {
       if state.next() == Some('&') {
         state.advance();
 
-        TokenType::And
+        TT::And
       } else {
-        TokenType::Daemon
+        TT::Daemon
       }
     }
-    '$' => TokenType::Dollar,
-    '@' => TokenType::At,
-    '?' => TokenType::Question,
-    ',' => TokenType::Comma,
-    ':' => TokenType::Colon,
-    ';' => TokenType::Semicolon,
-    '(' => TokenType::LParen,
-    '[' => TokenType::LBracket,
-    '{' => TokenType::LBrace,
-    ')' => TokenType::RParen,
-    ']' => TokenType::RBracket,
-    '}' => TokenType::RBrace,
+    '$' => TT::Dollar,
+    '@' => TT::At,
+    '?' => TT::Question,
+    ',' => TT::Comma,
+    ':' => TT::Colon,
+    ';' => TT::Semicolon,
+    '(' => TT::LParen,
+    '[' => TT::LBracket,
+    '{' => TT::LBrace,
+    ')' => TT::RParen,
+    ']' => TT::RBracket,
+    '}' => TT::RBrace,
     _ => return Err(Error::new(&f!("Unknown character '{char}'"), state)),
   };
 
@@ -337,7 +326,7 @@ fn classify_str(str: &str) -> TokenType {
   if let Some(r#type) = KEYWORDS.get(str) {
     r#type.clone()
   } else {
-    TokenType::Identifier(str.to_string())
+    TT::Identifier(str.to_string())
   }
 }
 

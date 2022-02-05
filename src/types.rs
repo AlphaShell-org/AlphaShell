@@ -22,9 +22,11 @@ impl Token {
   }
 }
 
+pub type TT = TokenType;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
-  Integer(i64),
+  Integer(i32),
   Float(f32),
 
   String(String),
@@ -34,6 +36,7 @@ pub enum TokenType {
   Export,
   Let,
   Import,
+  Source,
   Function,
   Return,
   If,
@@ -112,7 +115,7 @@ pub enum TokenType {
 impl std::fmt::Display for Token {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let this = self;
-    write_f!(f, "{this.r#type} at {this.position}")
+    write_f!(f, "{this.r#type}")
   }
 }
 
@@ -124,6 +127,6 @@ impl Default for TokenType {
 
 impl std::fmt::Display for TokenType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{:?}", self)
+    write!(f, "{self:?}",)
   }
 }
