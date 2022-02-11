@@ -6,8 +6,13 @@
 #[macro_use]
 extern crate fstrings;
 
-use std::{env, fs, io::Write, ops::ControlFlow};
-use std::{fs::File, io::prelude::Read, path::Path};
+use std::{
+  env, fs,
+  fs::File,
+  io::{prelude::Read, Write},
+  ops::ControlFlow,
+  path::Path,
+};
 
 mod types;
 
@@ -78,8 +83,19 @@ fn run_for_file(path: &Path) -> ControlFlow<()> {
     }
   });
 
+  println!("{code}");
+
   time!("Writing", {
-    write_file(&Path::new("./build").join(path.file_name().unwrap()), &code);
+    let build_path = Path::new("./build");
+
+    match fs::remove_dir_all(build_path) {
+      Ok(_) => (),
+      Err(e) => panic!("Cannot remove folder '{build_path:?}', error: '{e}'"),
+    };
+
+    let mut new_path = build_path.join(path.file_name().unwrap());
+    new_path.set_extension("zsh");
+    write_file(&new_path, &code);
   });
 
   ControlFlow::Continue(())

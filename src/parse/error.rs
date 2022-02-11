@@ -1,7 +1,7 @@
-use crate::types::{Position, Token};
 use std::fmt;
 
 use super::parse_helper::ParseHelper;
+use crate::types::{Position, Token};
 
 pub type ParserResult<T> = Result<T, Error>;
 
@@ -13,10 +13,11 @@ pub struct Error {
 
 impl Error {
   pub fn new(msg: &str, token: Option<&Token>) -> Self {
-    Error {
+    let err = Error {
       msg: msg.to_string(),
       token: token.map(Clone::clone),
-    }
+    };
+    panic!("{err}");
   }
 
   pub fn unexpected(ph: &ParseHelper) -> Self {
@@ -29,7 +30,7 @@ impl Error {
       ph.get_index()
     );
 
-    Self::new(&f!("Unexpected token {token}"), Some(token))
+    Self::new(&format!("Unexpected token {token}"), Some(token))
   }
 
   pub fn end(ph: &ParseHelper) -> Error {
@@ -42,21 +43,21 @@ impl Error {
 
     let last = ph.get_tokens().last().unwrap();
 
-    Self::new(&f!("Unexpected end of input after {last}"), Some(last))
+    Self::new(&format!("Unexpected end of input after {last}"), Some(last))
   }
 }
 
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let Error { msg, token } = self;
-    
+
     if let Some(token) = token {
       let Position(line, column) = token.position;
       let (line, column) = (line + 1, column + 1); // account for zero indexing
 
-      write_f!(f, "ParserError: \"{msg}\" at position {line}:{column}")
+      write!(f, "ParserError: \"{msg}\" at position {line}:{column}")
     } else {
-      write_f!(f, "ParserError: \"{msg}\"")
+      write!(f, "ParserError: \"{msg}\"")
     }
   }
 }

@@ -1,10 +1,9 @@
-use crate::{check_token, parse::value, types::TT};
-
 use super::{
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
 };
+use crate::{check_token, parse::value, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Next {
@@ -31,9 +30,7 @@ impl FunctionCall {
   }
 }
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  check_token!(ph, TT::Identifier(..));
-
+pub fn parse_function_call(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
   let name = if let Some(token) = ph.peek(0) {
     match token {
       TT::Identifier(name) => name.clone(),
@@ -89,6 +86,19 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   if is_daemon {
     ph.advance();
   }
+
+  Ok(FunctionCall::new(name, args, next, is_daemon))
+}
+
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  check_token!(ph, TT::Identifier(..));
+
+  let FunctionCall {
+    name,
+    args,
+    is_daemon,
+    next,
+  } = parse_function_call(ph)?;
 
   if next.is_none() {
     check_token!(ph, TT::Semicolon);

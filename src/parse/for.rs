@@ -1,5 +1,3 @@
-use crate::{check_token, types::TT};
-
 use super::{
   block,
   error::{Error, ParserResult},
@@ -7,14 +5,15 @@ use super::{
   parse_helper::ParseHelper,
   value,
 };
+use crate::{check_token, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct For {
-  start: i32,
-  end: i32,
-  step: i32,
-  variable: String,
-  block: Box<Node>,
+  pub start: i32,
+  pub end: i32,
+  pub step: i32,
+  pub variable: String,
+  pub block: Box<Node>,
 }
 
 impl For {
@@ -31,9 +30,9 @@ impl For {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Foreach {
-  variable: String,
-  iterable: Box<Node>,
-  block: Box<Node>,
+  pub variable: String,
+  pub iterable: Box<Node>,
+  pub block: Box<Node>,
 }
 
 impl Foreach {

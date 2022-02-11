@@ -1,17 +1,16 @@
-use crate::{check_token, types::TT};
-
 use super::{
-  block::{self},
+  block,
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
 };
+use crate::{check_token, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Function {
-  name: String,
-  params: Vec<String>,
-  block: Box<Node>,
+  pub name: String,
+  pub params: Vec<String>,
+  pub block: Box<Node>,
 }
 
 impl Function {

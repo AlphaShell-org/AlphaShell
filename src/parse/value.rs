@@ -1,13 +1,12 @@
+use super::{
+  error::{Error, ParserResult},
+  function_call::{self, FunctionCall},
+  node::Node,
+  parse_helper::ParseHelper,
+};
 use crate::{
   check_token,
   types::{TokenType, TT},
-};
-
-use super::{
-  error::{Error, ParserResult},
-  function_call::FunctionCall,
-  node::Node,
-  parse_helper::ParseHelper,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -60,9 +59,9 @@ impl From<&TokenType> for Data {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Expression {
-  left: Box<Value>,
-  operator: BinaryOperator,
-  right: Box<Value>,
+  pub left: Box<Value>,
+  pub operator: BinaryOperator,
+  pub right: Box<Value>,
 }
 
 impl Expression {
@@ -83,7 +82,15 @@ pub enum Value {
 
 fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
   let token = ph.peek(0);
+
+  let next = ph.peek(1);
+
   let value = match token {
+    Some(TokenType::Identifier(..)) if ph.peek(1) == Some(&TT::LParen) => {
+      println!("function call");
+      let call = function_call::parse_function_call(ph)?;
+      return Ok(Value::Raw(Data::FunctionCall(call)));
+    }
     Some(TT::Identifier(..) | TT::String(..) | TT::Integer(..) | TT::Float(..) | TT::At) => {
       Ok(Value::Raw(token.unwrap().into()))
     }

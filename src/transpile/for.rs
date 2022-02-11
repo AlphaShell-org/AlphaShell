@@ -1,23 +1,27 @@
-use crate::parse::var::DeclarationType;
-use crate::parse::{node::Node, var::Declaration};
-
-use super::error::{Error, TranspileResult};
+use super::{
+  block,
+  error::{Error, TranspileResult},
+};
+use crate::parse::{
+  node::Node,
+  r#for::For,
+  var::{Declaration, DeclarationType},
+};
 
 pub fn transpile(node: &Node) -> TranspileResult<String> {
   match node {
-    Node::Declaration(Declaration {
-      r#type,
-      name,
-      value,
+    Node::For(For {
+      start,
+      end,
+      step,
+      variable,
+      block,
     }) => {
-      let type_string = match r#type {
-        DeclarationType::Export => "export",
-        DeclarationType::Let => "local",
-      };
+      let block = block::transpile(block)?;
 
-      let value = super::value::transpile(value)?;
+      let output = format!("for {variable} in {{{start}..{end}..{step}}}; do\n{block}\ndone");
 
-      Ok(format!(r#"{type_string} {name}="{value}""#))
+      Ok(output)
     }
     _ => Err(Error::new("Invalid node type", node)),
   }

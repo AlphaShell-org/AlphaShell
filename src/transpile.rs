@@ -1,8 +1,9 @@
 mod error;
 // mod utils;
 
-use crate::parse::node::{Node, Node::*};
 use error::TranspileResult;
+
+use crate::parse::node::{Node, Node::*};
 
 mod block;
 mod declaration;
@@ -17,7 +18,7 @@ mod value;
 mod r#while;
 
 pub fn transpile(tree: &[Node]) -> TranspileResult<String> {
-  let mut output = String::new();
+  let mut output = Vec::new();
 
   for node in tree {
     let code = match node {
@@ -39,8 +40,8 @@ pub fn transpile(tree: &[Node]) -> TranspileResult<String> {
       Return(value) => Ok(format!("return {value}")),
     }?;
 
-    output.push_str(&f!("{code}\n"));
+    output.push(code);
   }
 
-  Ok(output)
+  Ok(output.join("\n"))
 }
