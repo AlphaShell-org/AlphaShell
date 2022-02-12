@@ -71,7 +71,7 @@ impl ParseHelper {
       .tokens
       .iter()
       .enumerate()
-      .map(|(i, token)| f!("{i}: {token}"))
+      .map(|(i, token)| format!("{i}: {token}"))
       .collect::<Vec<_>>()
       .join(",\n")
   }

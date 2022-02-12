@@ -1,11 +1,10 @@
-use crate::{check_token, types::TT};
-
 use super::{
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
   value,
 };
+use crate::{check_token, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum DeclarationType {

@@ -1,7 +1,8 @@
 mod error;
 
-use super::types::{Position, Token, TokenType, TT};
 use error::{Error, Result};
+
+use super::types::{Position, Token, TokenType, TT};
 
 static KEYWORDS: phf::Map<&'static str, TokenType> = phf::phf_map! {
   "let" => TT::Let,
@@ -148,7 +149,7 @@ fn load_number(state: &mut State) -> Result<Token> {
       _ => {
         if is_alpha_num(char) {
           return Err(Error::new(
-            &f!("Encountered invalid character '{char}' while parsing a number"),
+            &format!("Encountered invalid character '{char}' while parsing a number"),
             state,
           ));
         }
@@ -214,7 +215,7 @@ fn load_string(state: &mut State) -> Result<Token> {
 
   if state.char() != quote_type {
     return Err(Error::new(
-      &f!("No matching quote for '{quote_type}' found"),
+      &format!("No matching quote for '{quote_type}' found"),
       state,
     ));
   }
@@ -314,7 +315,7 @@ fn load_operator(state: &mut State) -> Result<Token> {
     ')' => TT::RParen,
     ']' => TT::RBracket,
     '}' => TT::RBrace,
-    _ => return Err(Error::new(&f!("Unknown character '{char}'"), state)),
+    _ => return Err(Error::new(&format!("Unknown character '{char}'"), state)),
   };
 
   state.advance();

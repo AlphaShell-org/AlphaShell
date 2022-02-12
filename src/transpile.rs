@@ -3,7 +3,10 @@ mod error;
 
 use error::TranspileResult;
 
-use crate::parse::node::{Node, Node::*};
+use crate::parse::node::Node::{
+  self, Block, Break, Continue, Declaration, For, Foreach, Function, FunctionCall, If, Import,
+  ImportedCode, IndexCall, Return, Value, While,
+};
 
 mod block;
 mod declaration;

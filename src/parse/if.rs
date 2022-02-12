@@ -1,10 +1,9 @@
+use super::{error::ParserResult, node::Node, parse_helper::ParseHelper};
 use crate::{
   check_token,
   parse::{block, error::Error, value},
   types::TT,
 };
-
-use super::{error::ParserResult, node::Node, parse_helper::ParseHelper};
 
 #[derive(Debug, PartialEq, Clone)]
 struct Elif(Node, Node);

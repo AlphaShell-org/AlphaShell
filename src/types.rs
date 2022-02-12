@@ -5,8 +5,8 @@ pub struct Position(pub usize, pub usize);
 
 impl fmt::Display for Position {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    let this = self;
-    write_f!(f, "{this.0}:{this.1}")
+    let Position(line, column) = self;
+    write!(f, "{line}:{column}")
   }
 }
 
@@ -114,8 +114,8 @@ pub enum TokenType {
 
 impl std::fmt::Display for Token {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let this = self;
-    write_f!(f, "{this.r#type}")
+    let Token { r#type, .. } = self;
+    write!(f, "{type}")
   }
 }
 

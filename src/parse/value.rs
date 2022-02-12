@@ -4,10 +4,7 @@ use super::{
   node::Node,
   parse_helper::ParseHelper,
 };
-use crate::{
-  check_token,
-  types::{TokenType, TT},
-};
+use crate::types::{TokenType, TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum BinaryOperator {
@@ -83,12 +80,10 @@ pub enum Value {
 fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
   let token = ph.peek(0);
 
-  let next = ph.peek(1);
-
   let value = match token {
     Some(TokenType::Identifier(..)) if ph.peek(1) == Some(&TT::LParen) => {
       println!("function call");
-      let call = function_call::parse_function_call(ph)?;
+      let call = function_call::parse_inner(ph)?;
       return Ok(Value::Raw(Data::FunctionCall(call)));
     }
     Some(TT::Identifier(..) | TT::String(..) | TT::Integer(..) | TT::Float(..) | TT::At) => {

@@ -1,5 +1,6 @@
-use super::{Position, State};
 use std::fmt;
+
+use super::{Position, State};
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, Clone)]
@@ -23,6 +24,6 @@ impl fmt::Display for Error {
     let Position(line, column) = pos;
     let (line, column) = (line + 1, column + 1); // account for zero indexing
 
-    write_f!(f, "LexerError: \"{msg}\" at position {line}:{column}")
+    write!(f, "LexerError: \"{msg}\" at position {line}:{column}")
   }
 }

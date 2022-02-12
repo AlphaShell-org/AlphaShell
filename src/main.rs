@@ -3,9 +3,6 @@
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::cast_possible_truncation)]
 
-#[macro_use]
-extern crate fstrings;
-
 use std::{
   env, fs,
   fs::File,

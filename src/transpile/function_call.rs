@@ -14,7 +14,7 @@ fn transpile_next(next: &Next) -> TranspileResult<String> {
   }
 }
 
-pub fn transpile_function_call(call: &FunctionCall) -> TranspileResult<String> {
+pub fn transpile_inner(call: &FunctionCall) -> TranspileResult<String> {
   let FunctionCall {
     name,
     args,
@@ -34,8 +34,8 @@ pub fn transpile_function_call(call: &FunctionCall) -> TranspileResult<String> {
     format!("{name} {args}")
   };
 
-  let mut call = if let Some(next) = next {
-    let next = transpile_next(&next)?;
+  let call = if let Some(next) = next {
+    let next = transpile_next(next)?;
     format!("{basic_call} | {next}")
   } else if *is_daemon {
     format!("{basic_call} &")
@@ -48,7 +48,7 @@ pub fn transpile_function_call(call: &FunctionCall) -> TranspileResult<String> {
 
 pub fn transpile(node: &Node) -> TranspileResult<String> {
   match node {
-    Node::FunctionCall(call) => transpile_function_call(call),
+    Node::FunctionCall(call) => transpile_inner(call),
     _ => Err(Error::new("Invalid node type", node)),
   }
 }

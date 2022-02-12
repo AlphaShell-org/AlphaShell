@@ -30,7 +30,7 @@ impl FunctionCall {
   }
 }
 
-pub fn parse_function_call(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
+pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
   let name = if let Some(token) = ph.peek(0) {
     match token {
       TT::Identifier(name) => name.clone(),
@@ -98,7 +98,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     args,
     is_daemon,
     next,
-  } = parse_function_call(ph)?;
+  } = parse_inner(ph)?;
 
   if next.is_none() {
     check_token!(ph, TT::Semicolon);

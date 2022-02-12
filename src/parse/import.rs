@@ -1,12 +1,11 @@
 use std::path::Path;
 
-use crate::{check_token, types::TT};
-
 use super::{
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
 };
+use crate::{check_token, types::TT};
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Import | TT::Source);

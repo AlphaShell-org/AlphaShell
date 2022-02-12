@@ -3,7 +3,6 @@ use super::{
   parse_helper::ParseHelper,
   value::{Data, Value},
 };
-
 use crate::{
   check_token,
   parse::error::{Error, ParserResult},

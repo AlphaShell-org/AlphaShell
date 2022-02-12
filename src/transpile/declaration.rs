@@ -1,7 +1,8 @@
-use crate::parse::var::DeclarationType;
-use crate::parse::{node::Node, var::Declaration};
-
 use super::error::{Error, TranspileResult};
+use crate::parse::{
+  node::Node,
+  var::{Declaration, DeclarationType},
+};
 
 pub fn transpile(node: &Node) -> TranspileResult<String> {
   match node {

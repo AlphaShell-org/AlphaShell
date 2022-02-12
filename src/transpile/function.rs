@@ -2,11 +2,7 @@ use super::{
   block,
   error::{Error, TranspileResult},
 };
-use crate::parse::{
-  function::Function,
-  node::Node,
-  var::{Declaration, DeclarationType},
-};
+use crate::parse::{function::Function, node::Node};
 
 pub fn transpile(node: &Node) -> TranspileResult<String> {
   match node {

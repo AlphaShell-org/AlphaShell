@@ -1,6 +1,5 @@
-use crate::{check_token, parse::error::Error, types::TT};
-
 use super::{error::ParserResult, node::Node, parse_helper::ParseHelper};
+use crate::{check_token, parse::error::Error, types::TT};
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Return);
@@ -8,7 +7,10 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   let value = if let Some(TT::Integer(int)) = ph.peek(0) {
     if *int < 0 && *int >= 256 {
-      return Err(Error::new(&f!("Invalid return value: {int}"), ph.get(0)));
+      return Err(Error::new(
+        &format!("Invalid return value: {int}"),
+        ph.get(0),
+      ));
     }
 
     Node::Return(*int as u8)
