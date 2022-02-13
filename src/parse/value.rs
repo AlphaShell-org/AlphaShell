@@ -1,6 +1,8 @@
 use super::{
+  array,
   error::{Error, ParserResult},
   function_call::{self, FunctionCall},
+  map,
   node::Node,
   parse_helper::ParseHelper,
 };
@@ -82,13 +84,14 @@ fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
 
   let value = match token {
     Some(TokenType::Identifier(..)) if ph.peek(1) == Some(&TT::LParen) => {
-      println!("function call");
       let call = function_call::parse_inner(ph)?;
       return Ok(Value::Raw(Data::FunctionCall(call)));
     }
     Some(TT::Identifier(..) | TT::String(..) | TT::Integer(..) | TT::Float(..) | TT::At) => {
       Ok(Value::Raw(token.unwrap().into()))
     }
+    Some(TT::LBracket) => Ok(array::parse(ph)?),
+    Some(TT::LBrace) => Ok(map::parse(ph)?),
     Some(_) => Err(Error::unexpected(ph)),
     None => Err(Error::end(ph)),
   };

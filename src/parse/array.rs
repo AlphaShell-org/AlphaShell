@@ -1,5 +1,4 @@
 use super::{
-  node::Node,
   parse_helper::ParseHelper,
   value::{Data, Value},
 };
@@ -9,14 +8,14 @@ use crate::{
   types::TT,
 };
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
   check_token!(ph, TT::LBracket);
   ph.advance();
 
   let mut values = Vec::new();
 
   if ph.peek(0) == Some(&TT::LBracket) {
-    return Ok(Node::Value(Value::Raw(Data::Array(values))));
+    return Ok(Value::Raw(Data::Array(values)));
   }
 
   loop {
@@ -36,5 +35,5 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     };
   }
 
-  Ok(Node::Value(Value::Raw(Data::Array(values))))
+  Ok(Value::Raw(Data::Array(values)))
 }

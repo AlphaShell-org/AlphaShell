@@ -1,24 +1,31 @@
 use super::{
   block,
   error::{Error, TranspileResult},
+  transpiler::Transpiler,
 };
 use crate::parse::{function::Function, node::Node};
 
-pub fn transpile(node: &Node) -> TranspileResult<String> {
+pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
     Node::Function(Function {
       name,
       params,
       block,
     }) => {
-      let block = block::transpile(block)?;
+      let head = t.use_indent(&format!("function {name}() {{"));
+
+      t.indent();
       let params = params
         .iter()
         .enumerate()
-        .map(|(i, param)| format!("local {param}=${i}\n"))
+        .map(|(i, param)| t.use_indent(&format!("local {param}=${i}\n")))
         .collect::<String>();
+      t.deindent();
 
-      let output = format!("function {name}() {{\n{params}\n{block}\n}}");
+      let block = block::transpile(t, block)?;
+      let end = t.use_indent("}");
+
+      let output = format!("{head}\n{params}{block}\n{end}");
 
       Ok(output)
     }

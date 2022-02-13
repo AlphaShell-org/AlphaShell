@@ -9,6 +9,7 @@ use std::{
   io::{prelude::Read, Write},
   ops::ControlFlow,
   path::Path,
+  time::Instant,
 };
 
 mod types;
@@ -46,7 +47,9 @@ macro_rules! time {
 }
 
 fn run_for_file(path: &Path) -> ControlFlow<()> {
-  println!("\n\n{path:?}");
+  let start = Instant::now();
+
+  println!("\n\nTranspiling {path:?}\n");
 
   let contents = time!("Reading", { read_file(path) });
 
@@ -80,20 +83,29 @@ fn run_for_file(path: &Path) -> ControlFlow<()> {
     }
   });
 
-  println!("{code}");
-
   time!("Writing", {
     let build_path = Path::new("./build");
 
-    match fs::remove_dir_all(build_path) {
+    if build_path.exists() {
+      match fs::remove_dir_all(build_path) {
+        Ok(_) => (),
+        Err(e) => panic!("Cannot remove folder '{build_path:?}', error: '{e}'"),
+      };
+    }
+
+    match fs::create_dir_all(build_path) {
       Ok(_) => (),
-      Err(e) => panic!("Cannot remove folder '{build_path:?}', error: '{e}'"),
+      Err(e) => panic!("Cannot create folder '{path:?}', error: '{e}'"),
     };
 
     let mut new_path = build_path.join(path.file_name().unwrap());
     new_path.set_extension("zsh");
     write_file(&new_path, &code);
   });
+
+  let duration = start.elapsed();
+
+  println!("\nTotal time for {path:?}: {duration:?}\n");
 
   ControlFlow::Continue(())
 }
@@ -112,16 +124,6 @@ fn read_file(path: &Path) -> String {
 }
 
 fn write_file(path: &Path, contents: &str) {
-  let prefix = match path.parent() {
-    Some(path) => path,
-    None => panic!("Invalid path '{path:?}"),
-  };
-
-  match fs::create_dir_all(prefix) {
-    Ok(_) => (),
-    Err(e) => panic!("Cannot create folder '{path:?}', error: '{e}'"),
-  };
-
   let mut file = match File::create(path) {
     Ok(file) => file,
     Err(e) => panic!("Couldn't open file '{path:?}' for writing, error: '{e}'"),

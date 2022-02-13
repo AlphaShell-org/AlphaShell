@@ -11,7 +11,7 @@ use super::{
 pub enum Node {
   Value(Value),
 
-  Import(Vec<String>),
+  Source(Vec<String>),
   ImportedCode(Vec<Node>),
   Block(Vec<Node>),
   Function(Function),

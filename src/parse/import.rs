@@ -56,7 +56,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
     Ok(Node::ImportedCode(imported_trees))
   } else {
-    let import = Node::Import(files);
+    let import = Node::Source(files);
 
     Ok(import)
   }

@@ -1,10 +1,15 @@
-use super::error::{Error, TranspileResult};
+use super::{
+  error::{Error, TranspileResult},
+  transpiler::Transpiler,
+  value,
+};
 use crate::parse::{
   node::Node,
+  value::{Data, Value},
   var::{Declaration, DeclarationType},
 };
 
-pub fn transpile(node: &Node) -> TranspileResult<String> {
+pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
     Node::Declaration(Declaration {
       r#type,
@@ -16,9 +21,14 @@ pub fn transpile(node: &Node) -> TranspileResult<String> {
         DeclarationType::Let => "local",
       };
 
-      let value = super::value::transpile(value)?;
+      if let Node::Value(Value::Raw(Data::Map(_))) = **value {
+        let value = value::transpile(t, value)?;
+        return Ok(format!("typeset -A {name}={value}"));
+      }
 
-      Ok(format!(r#"{type_string} {name}={value}"#))
+      let value = value::transpile(t, value)?;
+
+      Ok(t.use_indent(&format!(r#"{type_string} {name}={value}"#)))
     }
     _ => Err(Error::new("Invalid node type", node)),
   }

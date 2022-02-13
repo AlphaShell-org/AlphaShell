@@ -1,19 +1,18 @@
 use super::{
   error::ParserResult,
-  node::Node,
   parse_helper::ParseHelper,
   value::{Data, Value},
 };
 use crate::{check_token, parse::error::Error, types::TT};
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
   check_token!(ph, TT::LBrace);
   ph.advance();
 
   let mut items = Vec::new();
   loop {
     let key = match ph.peek(0) {
-      Some(TT::String(key)) => key.clone(),
+      Some(TT::Identifier(key)) => key.clone(),
       Some(TT::RBrace) => break,
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
@@ -43,7 +42,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     };
   }
 
-  ph.advance();
+  // ph.advance();
 
-  Ok(Node::Value(Value::Raw(Data::Map(items))))
+  Ok(Value::Raw(Data::Map(items)))
 }

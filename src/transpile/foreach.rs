@@ -1,22 +1,27 @@
 use super::{
   block,
   error::{Error, TranspileResult},
+  transpiler::{BlockType, Transpiler},
   value,
 };
 use crate::parse::{node::Node, r#for::Foreach};
 
-pub fn transpile(node: &Node) -> TranspileResult<String> {
+pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
     Node::Foreach(Foreach {
       variable,
       iterable,
       block,
     }) => {
-      let block = block::transpile(block)?;
+      t.change_block(BlockType::Foreach);
+      let iterable = value::transpile(t, iterable)?;
+      t.reset_block();
 
-      let iterable = value::transpile(iterable)?;
+      let head = t.use_indent(&format!("for {variable} in {iterable}; do"));
+      let block = block::transpile(t, block)?;
+      let end = t.use_indent("done");
 
-      let output = format!("for {variable} in {iterable}; do\n{block}\ndone");
+      let output = format!("{head}\n{block}\n{end}");
 
       Ok(output)
     }

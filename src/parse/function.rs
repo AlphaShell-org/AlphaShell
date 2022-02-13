@@ -58,6 +58,8 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     };
   }
 
+  params.insert(0, "__name__".into()); // $0 is the name of the function
+
   check_token!(ph, TT::RParen);
 
   ph.advance();
