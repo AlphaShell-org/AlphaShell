@@ -2,50 +2,52 @@ let a = 5;
 export b = 3 + 2;
 let person = "John";
 let c = pwd();
-//let people = ["John", "Peter"]; // array
-//let map = { foo: "bar" }; // associative array (dict)
+let people = ["John", "Peter"]; // array
+let map = { foo: "bar", foo2: "baz" }; // associative array (dict)
 
 // a = 10;
 
 echo(a, b, c);
-//echo(people[0]);
-//echo(map["foo"]);
-//echo($(a + b)); // interpret + as arithmetic instead of concatenation
+// echo(people[0]);
+// echo(map["foo"]);
+// echo($(a + b)); // interpret as arithmetic
 
-//if a <= 10 { echo("Larger than 10"); }
+// if a <= 10 { echo("Larger than 10"); }
+
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }
-// for word in ["hello", "world"] { echo(word); }
-// for person in people { echo(person); }
+for word in ["hello", "world"] { echo(word); }
+for person in people { echo(person); }
 
-/*
-   let x = 0;
-   while x < 10 { echo(x); }
- */
+let x = 0;
+// while x < 10 { echo(x); }
+
 fn hello(name, age) {
   echo("Hello ${name} aged ${age}");
 }
-hello("John", 25) | wc(); // pipe output
-/*
-   fn arrayFunction() {
-   for a in @ { // @ is args array
-// a | sed("s/foo/bar") // pipe value
-}
-return 0;
-}
- */
-/*
-   let string = "abcb";
-   if matched ~= "abc{2,5}" { // regex matching
-   echo("matched");
-   } elif "abcb" ~= "a[bc]{3,}" {
-   echo("matched elif");
-   } else {
-   echo("not matched");
-   }
- */
 
-firefox("google.com") &; // run binary as a daemon
+hello("John", 25) | lolcat(); // pipe function output
+// let fb = "foobar" | sed("s/bar/baz") // pipe value
+
+fn arrayFunction() {
+  for a in @ { // @ is args array
+    echo(a);
+  }
+  return 0;
+}
+
+arrayFunction("a", "b", "c", "d", "e");
+
+let string = "abcb";
+// if matched ~= "abc{2,5}" { // regex matching
+//   echo("matched");
+// } elif "abcb" ~= "a[bc]{3,}" {
+//   echo("matched elif");
+// } else {
+//   echo("not matched");
+// }
+
+firefox("google.com") &; // run as a daemon
 
 import "test/test2.bzs"; // transpile time import - similar to `#include`
 

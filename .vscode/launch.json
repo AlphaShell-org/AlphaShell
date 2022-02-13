@@ -15,7 +15,7 @@
           "kind": "bin"
         }
       },
-      "args": ["${workspaceFolder}/dist/test.zjs"],
+      "args": ["${workspaceFolder}/test/test.bzs", "${workspaceFolder}/test/test3.bzs"],
       "cwd": "${workspaceFolder}"
     },
     {
