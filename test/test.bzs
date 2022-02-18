@@ -27,7 +27,8 @@ fn hello(name, age) {
 }
 
 hello("John", 25) | lolcat(); // pipe function output
-// let fb = "foobar" | sed("s/bar/baz") // pipe value
+// echo("foobar" | sed("s/bar/baz")); // pipe value
+
 
 fn arrayFunction() {
   for a in @ { // @ is args array

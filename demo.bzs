@@ -3,7 +3,7 @@ export b = 3 + 2;
 let person = "John";
 let c = pwd();
 let people = ["John", "Peter"]; // array
-let map = { foo: "bar" }; // associative array (dict)
+let map = { foo: "bar", foo2: "baz" }; // associative array (dict)
 
 a = 10;
 
@@ -13,6 +13,7 @@ echo(map["foo"]);
 echo($(a + b)); // interpret as arithmetic
 
 if a <= 10 { echo("Larger than 10"); }
+
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }
 for word in ["hello", "world"] { echo(word); }
@@ -24,14 +25,19 @@ while x < 10 { echo(x); }
 fn hello(name, age) {
   echo("Hello ${name} aged ${age}");
 }
-hello("John", 25) | wc(); // pipe output
+
+hello("John", 25) | lolcat(); // pipe function output
+echo("foobar" | sed("s/bar/baz")); // pipe value (adds echo call there)
+
 
 fn arrayFunction() {
   for a in @ { // @ is args array
-    a | sed("s/foo/bar") // pipe value
+    echo(a);
   }
   return 0;
 }
+
+arrayFunction("a", "b", "c", "d", "e");
 
 let string = "abcb";
 if matched ~= "abc{2,5}" { // regex matching
@@ -42,8 +48,8 @@ if matched ~= "abc{2,5}" { // regex matching
   echo("not matched");
 }
 
-firefox("google.com") &; // run binary as a daemon
+firefox("google.com") &; // run as a daemon
 
-import "dist/test2.zjs"; // transpile time import - similar to `#include`
+import "test/test2.bzs"; // transpile time import - similar to `#include`
 
 source "another_folder/file.zsh"; // runtime import, just like source in zsh
