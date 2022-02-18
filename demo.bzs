@@ -28,7 +28,7 @@ hello("John", 25) | wc(); // pipe output
 
 fn arrayFunction() {
   for a in @ { // @ is args array
-    a | sed("s/foo/bar") // pipe value
+    a | sed("s/foo/bar"); // pipe value
   }
   return 0;
 }

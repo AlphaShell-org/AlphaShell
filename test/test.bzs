@@ -12,7 +12,7 @@ echo(a, b, c);
 // echo(map["foo"]);
 // echo($(a + b)); // interpret as arithmetic
 
-// if a <= 10 { echo("Larger than 10"); }
+if a <= 10 { echo("Larger than 10"); }
 
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }
@@ -22,11 +22,11 @@ for person in people { echo(person); }
 let x = 0;
 // while x < 10 { echo(x); }
 
-fn hello(name, age) {
-  echo("Hello ${name} aged ${age}");
+fn hello(name, age, cwd) {
+  echo("Hello ${name} aged ${age}, we're in ${cwd}");
 }
 
-hello("John", 25) | lolcat(); // pipe function output
+hello("John", 25, c) | lolcat(); // pipe function output
 // let fb = "foobar" | sed("s/bar/baz") // pipe value
 
 fn arrayFunction() {
