@@ -5,7 +5,9 @@ use super::{
 };
 use crate::{check_token, types::TT};
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub type Block = Vec<Node>;
+
+pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Block> {
   check_token!(ph, TT::LBrace);
 
   ph.advance();
@@ -22,17 +24,21 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
     if braces_level == 0 {
       let body = super::parse(&tmp)?;
-      let block = Node::Block(body);
 
       ph.advance();
 
-      return Ok(block);
+      return Ok(body);
     }
 
     tmp.push(token.clone());
-
     ph.advance();
   }
 
   Err(Error::end(ph))
+}
+
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  let body = parse_inner(ph)?;
+  let block = Node::Block(body);
+  Ok(block)
 }

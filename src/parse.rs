@@ -9,6 +9,7 @@ use parse_helper::ParseHelper;
 
 pub mod array;
 pub mod block;
+pub mod condition;
 pub mod r#for;
 pub mod function;
 pub mod function_call;
