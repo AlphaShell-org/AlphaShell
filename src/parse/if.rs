@@ -8,9 +8,9 @@ use super::{
 use crate::{check_token, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
-enum Else {
+pub enum Else {
   Else(Block),
-  Elif(If),
+  Elif(Box<If>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -20,11 +20,11 @@ struct Elif(Node, Node);
 pub struct If {
   condition: Condition,
   block: Block,
-  r#else: Option<Box<Else>>,
+  r#else: Option<Else>,
 }
 
 impl If {
-  pub fn new(condition: Condition, block: Block, r#else: Option<Box<Else>>) -> Self {
+  pub fn new(condition: Condition, block: Block, r#else: Option<Else>) -> Self {
     Self {
       condition,
       block,
@@ -51,12 +51,10 @@ fn parse_inner(ph: &mut ParseHelper) -> ParserResult<If> {
   ph.advance();
 
   let r#else = match ph.peek(0) {
-    Some(TT::Elif) => Some(Else::Elif(parse_inner(ph)?)),
+    Some(TT::Elif) => Some(Else::Elif(Box::new(parse_inner(ph)?))),
     Some(TT::Else) => Some(Else::Else(block::parse_inner(ph)?)),
     _ => None,
   };
-
-  let r#else = r#else.map(|val| Box::new(val));
 
   let r#if = If::new(condition, block, r#else);
 

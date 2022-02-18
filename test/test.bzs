@@ -13,6 +13,7 @@ echo(a, b, c);
 // echo($(a + b)); // interpret as arithmetic
 
 if a <= 10 { echo("Larger than 10"); }
+if person != "Peter" { echo("${person} is not Peter"); }
 
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }

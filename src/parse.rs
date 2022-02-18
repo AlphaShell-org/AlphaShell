@@ -17,6 +17,7 @@ pub mod r#if;
 pub mod import;
 pub mod map;
 pub mod r#return;
+pub mod ternary;
 pub mod value;
 pub mod var;
 pub mod r#while;
