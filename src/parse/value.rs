@@ -101,13 +101,13 @@ fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
   value
 }
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Value> {
   let left = parse_value(ph)?;
 
   let token = ph.peek(0);
   let operator = match token {
     Some(TT::Add | TT::Sub | TT::Multiply | TT::Modulo) => token.unwrap().into(),
-    Some(_) => return Ok(Node::Value(left)),
+    Some(_) => return Ok(left),
     None => return Err(Error::end(ph)),
   };
 
@@ -115,9 +115,13 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   let right = parse_value(ph)?;
 
-  Ok(Node::Value(Value::Expression(Expression::new(
+  Ok(Value::Expression(Expression::new(
     Box::new(left),
     operator,
     Box::new(right),
-  ))))
+  )))
+}
+
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+  Ok(Node::Value(parse_inner(ph)?))
 }

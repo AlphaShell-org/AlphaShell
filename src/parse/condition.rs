@@ -54,6 +54,7 @@ impl TryFrom<&TokenType> for LogicOperator {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Condition {
+  Value(Value),
   Simple(Simple),
   Compound(Compound),
 }
@@ -73,20 +74,30 @@ pub struct Simple {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Condition> {
-  let value = value::parse(ph);
+  let value = value::parse_inner(ph)?;
 
   let operator = match ph.peek(0) {
     Some(operator) => operator,
     None => return Err(Error::end(ph)),
   };
 
-  if let Ok(operator) = LogicOperator::try_from(operator) {
+  let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
+    let compound = Compound {
+      left: Box::new(value),
+      operator,
+      right: Box::new(parse(ph)?),
+    };
+    Condition::Compound(compound)
   } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
+    let simple {
+      left: value,
+      operator,
+      right: value::parse(ph),
+    };
+    Condition::Simple(simple)
   } else {
-    return Err(Error::unexpected(ph));
+    Condition::Value(value)
   };
 
-  ph.advance();
-
-  todo!()
+  Ok(condition)
 }
