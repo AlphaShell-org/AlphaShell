@@ -74,30 +74,45 @@ pub struct Simple {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Condition> {
-  let value = value::parse_inner(ph)?;
+  // loop {
+  //   let left = parse_simple(ph)?;
 
-  let operator = match ph.peek(0) {
-    Some(operator) => operator,
-    None => return Err(Error::end(ph)),
-  };
+  //   let left = if let Some(left) = left {
+  //     left
+  //   } else {
+  //     return Condition::Value()
+  //   }
+  // }
 
-  let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
-    let compound = Compound {
-      left: Box::new(value),
-      operator,
-      right: Box::new(parse(ph)?),
+  // let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
+  //   let compound = Compound {
+  //     left: Box::new(value),
+  //     operator,
+  //     right: Box::new(parse(ph)?),
+  //   };
+  //   Condition::Compound(compound)
+  // } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
+  // } else {
+  //   Condition::Value(value)
+  // };
+
+  let stack = vec![];
+  let rpn = vec![];
+
+  while let Some(token) = ph.get(0) {
+    let token = token.clone();
+
+    let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
+      Condition::Compound(compound)
+    } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
+    } else {
+      Condition::Value(value)
     };
-    Condition::Compound(compound)
-  } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
-    let simple {
-      left: value,
-      operator,
-      right: value::parse(ph),
-    };
-    Condition::Simple(simple)
-  } else {
-    Condition::Value(value)
-  };
 
-  Ok(condition)
+    ph.advance();
+  }
+
+  todo!();
+
+  // Ok(condition)
 }
