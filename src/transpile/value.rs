@@ -5,22 +5,22 @@ use super::{
 };
 use crate::parse::{
   node::Node,
-  value::{BinaryOperator, Data, Expression, Value},
+  value::{BinaryOperator, Value, Expression, Value},
 };
 
-fn transpile_raw(t: &mut Transpiler, value: &Data) -> TranspileResult<String> {
+fn transpile_raw(t: &mut Transpiler, value: &Value) -> TranspileResult<String> {
   match value {
-    Data::Identifier(name) => {
+    Value::Identifier(name) => {
       if t.get_block() == &Some(BlockType::Foreach) && name != "@" {
         Ok(format!("${{(@){name}}}"))
       } else {
         Ok(format!("${{{name}}}"))
       }
     }
-    Data::String(string) => Ok(format!("\"{string}\"")),
-    Data::Int(num) => Ok(num.to_string()),
-    Data::Float(num) => Ok(num.to_string()),
-    Data::Array(array) => {
+    Value::String(string) => Ok(format!("\"{string}\"")),
+    Value::Int(num) => Ok(num.to_string()),
+    Value::Float(num) => Ok(num.to_string()),
+    Value::Array(array) => {
       if t.get_block() == &Some(BlockType::Foreach) {
         Ok(
           array
@@ -40,7 +40,7 @@ fn transpile_raw(t: &mut Transpiler, value: &Data) -> TranspileResult<String> {
         ))
       }
     }
-    Data::Map(map) => {
+    Value::Map(map) => {
       // typeset -A assoc=([key1]=value1 [key2]=value2)
       Ok(format!(
         "({})",
@@ -51,7 +51,7 @@ fn transpile_raw(t: &mut Transpiler, value: &Data) -> TranspileResult<String> {
           .join(" ")
       ))
     }
-    Data::FunctionCall(call) => {
+    Value::FunctionCall(call) => {
       let call = function_call::transpile_inner(t, call)?;
       Ok(format!("$({call})"))
     }

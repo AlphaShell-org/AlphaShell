@@ -9,31 +9,16 @@ use super::{
 use crate::types::{TokenType, TT};
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum BinaryOperator {
-  Add,
-  Sub,
-  Multiply,
-  Divide,
-  And,
-  Or,
-}
-
-impl From<&TokenType> for BinaryOperator {
-  fn from(token: &TokenType) -> Self {
-    match token {
-      TT::Add => Self::Add,
-      TT::Sub => Self::Sub,
-      TT::Multiply => Self::Multiply,
-      TT::Divide => Self::Divide,
-      TT::And => Self::And,
-      TT::Or => Self::Or,
-      _ => unimplemented!(),
-    }
-  }
+enum Operation {
+  Add(Value, Value),
+  Sub(Value, Value),
+  Multiply(Value, Value),
+  Divide(Value, Value),
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum Data {
+pub enum Value {
+  Operation(Box<Operation>),
   Identifier(String),
   String(String),
   Int(i32),
@@ -43,7 +28,7 @@ pub enum Data {
   FunctionCall(FunctionCall),
 }
 
-impl From<&TokenType> for Data {
+impl From<&TokenType> for Value {
   fn from(token: &TokenType) -> Self {
     match token {
       TT::Integer(num) => Self::Int(*num),
@@ -76,7 +61,7 @@ impl Expression {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Value {
   Expression(Expression),
-  Raw(Data),
+  Raw(Value),
 }
 
 fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
@@ -85,7 +70,7 @@ fn parse_value(ph: &mut ParseHelper) -> ParserResult<Value> {
   let value = match token {
     Some(TokenType::Identifier(..)) if ph.peek(1) == Some(&TT::LParen) => {
       let call = function_call::parse_inner(ph)?;
-      return Ok(Value::Raw(Data::FunctionCall(call)));
+      return Ok(Value::Raw(Value::FunctionCall(call)));
     }
     Some(TT::Identifier(..) | TT::String(..) | TT::Integer(..) | TT::Float(..) | TT::At) => {
       Ok(Value::Raw(token.unwrap().into()))

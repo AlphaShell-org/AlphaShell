@@ -1,7 +1,7 @@
 use super::{
   error::ParserResult,
   parse_helper::ParseHelper,
-  value::{Data, Value},
+  value::{Value, Value},
 };
 use crate::{check_token, parse::error::Error, types::TT};
 
@@ -44,5 +44,5 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
 
   // ph.advance();
 
-  Ok(Value::Raw(Data::Map(items)))
+  Ok(Value::Raw(Value::Map(items)))
 }

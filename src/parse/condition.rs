@@ -7,107 +7,77 @@ use super::{
 use crate::types::{TokenType, TT};
 
 #[derive(Debug, PartialEq, Clone)]
-enum ConditionalOperator {
-  Equal,
-  NotEqual,
-  Greater,
-  Less,
-  GreaterEqual,
-  LessEqual,
-  RegexMatch,
+enum ConditionValue {
+  Equal(Value, Value),
+  NotEqual(Value, Value),
+  Greater(Value, Value),
+  Less(Value, Value),
+  GreaterEqual(Value, Value),
+  LessEqual(Value, Value),
+  RegexMatch(Value, Value),
+  And(Box<Condition>, Box<Condition>),
+  Or(Box<Condition>, Box<Condition>),
+  Not(Value),
 }
 
-impl TryFrom<&TokenType> for ConditionalOperator {
-  type Error = ();
-
-  fn try_from(value: &TokenType) -> Result<Self, Self::Error> {
-    match value {
-      TT::Equal => Ok(Self::Equal),
-      TT::NotEqual => Ok(Self::NotEqual),
-      TT::Greater => Ok(Self::Greater),
-      TT::Less => Ok(Self::Less),
-      TT::GreaterEqual => Ok(Self::GreaterEqual),
-      TT::LessEqual => Ok(Self::LessEqual),
-      TT::RegexMatch => Ok(Self::RegexMatch),
-      _ => Err(()),
-    }
+fn is_conditional_operator(token: TokenType) -> bool {
+  match token {
+    TokenType::And => true,
+    TokenType::Or => true,
+    TokenType::Not => true,
+    TokenType::Equal => true,
+    TokenType::Less => true,
+    TokenType::Greater => true,
+    TokenType::LessEqual => true,
+    TokenType::GreaterEqual => true,
+    TokenType::NotEqual => true,
+    _ => false,
   }
 }
 
-#[derive(Debug, PartialEq, Clone)]
-enum LogicOperator {
-  And,
-  Or,
-}
-
-impl TryFrom<&TokenType> for LogicOperator {
-  type Error = ();
-
-  fn try_from(value: &TokenType) -> Result<Self, Self::Error> {
-    match value {
-      TT::And => Ok(Self::And),
-      TT::Or => Ok(Self::Or),
-      _ => Err(()),
-    }
-  }
-}
+static PRECEDENCE: phf::Map<TokenType, u8> = phf::phf_map! {
+  TokenType::And => 1,
+    TokenType::Or => 2,
+    TokenType::Not => 3,
+    TokenType::Equal => true,
+    TokenType::Less => true,
+    TokenType::Greater => true,
+    TokenType::LessEqual => true,
+    TokenType::GreaterEqual => true,
+    TokenType::NotEqual => true,
+};
+fn operator_precedence(token: TokenType) -> u8 {}
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Condition {
   Value(Value),
-  Simple(Simple),
-  Compound(Compound),
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Compound {
-  left: Box<Condition>,
-  operator: LogicOperator,
-  right: Box<Condition>,
-}
-
-#[derive(Debug, PartialEq, Clone)]
-pub struct Simple {
-  left: Value,
-  operator: ConditionalOperator,
-  right: Value,
+  Compound(ConditionValue),
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Condition> {
-  // loop {
-  //   let left = parse_simple(ph)?;
+  let tokens = vec![];
 
-  //   let left = if let Some(left) = left {
-  //     left
-  //   } else {
-  //     return Condition::Value()
-  //   }
-  // }
+  let level = 0;
 
-  // let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
-  //   let compound = Compound {
-  //     left: Box::new(value),
-  //     operator,
-  //     right: Box::new(parse(ph)?),
-  //   };
-  //   Condition::Compound(compound)
-  // } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
-  // } else {
-  //   Condition::Value(value)
-  // };
+  while let Some(token) = ph.peak(0) {
+    if token == TT::LBrace {
+      break;
+    }
+
+    tokens.push(token);
+
+    ph.advance();
+  }
+
+  if tokens.is_empty() {
+    return Err(Error::new("Missing condition in if statement", ph.get(0)));
+  }
 
   let stack = vec![];
   let rpn = vec![];
 
   while let Some(token) = ph.get(0) {
     let token = token.clone();
-
-    let condition = if let Ok(operator) = LogicOperator::try_from(operator) {
-      Condition::Compound(compound)
-    } else if let Ok(operator) = ConditionalOperator::try_from(operator) {
-    } else {
-      Condition::Value(value)
-    };
 
     ph.advance();
   }
