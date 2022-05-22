@@ -2,15 +2,9 @@
 #![allow(clippy::cast_sign_loss)]
 #![allow(clippy::cast_possible_wrap)]
 #![allow(clippy::cast_possible_truncation)]
+#![feature(let_chains)]
 
-use std::{
-  env, fs,
-  fs::File,
-  io::{prelude::Read, Write},
-  ops::ControlFlow,
-  path::Path,
-  time::Instant,
-};
+use std::{env, fs::File, io::prelude::Read, ops::ControlFlow, path::Path, time::Instant};
 
 mod types;
 
@@ -20,8 +14,8 @@ use tokenize::tokenize;
 mod parse;
 use parse::parse;
 
-mod transpile;
-use transpile::transpile;
+// mod transpile;
+// use transpile::transpile;
 
 #[macro_use]
 mod utils;
@@ -49,9 +43,9 @@ macro_rules! time {
 fn run_for_file(path: &Path) -> ControlFlow<()> {
   let start = Instant::now();
 
-  println!("\n\nTranspiling {path:?}\n");
+  println!("\nTranspiling {path:?}\n");
 
-  let contents = time!("Reading", { read_file(path) });
+  let contents = read_file(path);
 
   let tokens = time!("Lexing", {
     match tokenize(&contents) {
@@ -73,7 +67,9 @@ fn run_for_file(path: &Path) -> ControlFlow<()> {
     }
   });
 
-  let code = time!("Transpiling", {
+  println!("{tree:?}");
+
+  /* let code = time!("Transpiling", {
     match transpile(&tree) {
       Ok(code) => code,
       Err(e) => {
@@ -81,9 +77,9 @@ fn run_for_file(path: &Path) -> ControlFlow<()> {
         return ControlFlow::Break(());
       }
     }
-  });
+  }); */
 
-  time!("Writing", {
+  /* time!("Writing", {
     let build_path = Path::new("./build");
 
     if build_path.exists() {
@@ -101,7 +97,7 @@ fn run_for_file(path: &Path) -> ControlFlow<()> {
     let mut new_path = build_path.join(path.file_name().unwrap());
     new_path.set_extension("zsh");
     write_file(&new_path, &code);
-  });
+  }); */
 
   let duration = start.elapsed();
 
@@ -115,22 +111,25 @@ fn read_file(path: &Path) -> String {
     Ok(path) => path,
     Err(e) => panic!("Couldn't open file '{path:?}', error: '{e}'"),
   };
+
   let mut contents = String::new();
+
   match file.read_to_string(&mut contents) {
     Ok(_) => (),
     Err(e) => panic!("Error reading file '{path:?}', error: '{e}'"),
   };
+
   contents
 }
 
-fn write_file(path: &Path, contents: &str) {
-  let mut file = match File::create(path) {
-    Ok(file) => file,
-    Err(e) => panic!("Couldn't open file '{path:?}' for writing, error: '{e}'"),
-  };
+// fn write_file(path: &Path, contents: &str) {
+//   let mut file = match File::create(path) {
+//     Ok(file) => file,
+//     Err(e) => panic!("Couldn't open file '{path:?}' for writing, error: '{e}'"),
+//   };
 
-  match file.write_all(contents.as_bytes()) {
-    Ok(_) => (),
-    Err(e) => panic!("Error writing file '{path:?}', error: '{e}'"),
-  };
-}
+//   match file.write_all(contents.as_bytes()) {
+//     Ok(_) => (),
+//     Err(e) => panic!("Error writing file '{path:?}', error: '{e}'"),
+//   };
+// }

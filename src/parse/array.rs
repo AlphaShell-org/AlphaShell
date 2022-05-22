@@ -1,31 +1,25 @@
-use super::{
-  parse_helper::ParseHelper,
-  value::{Value, Value},
-};
+use super::{parse_helper::ParseHelper, value::Value};
 use crate::{
   check_token,
-  parse::error::{Error, ParserResult},
+  parse::{
+    error::{Error, ParserResult},
+    value,
+  },
   types::TT,
 };
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Value>> {
   check_token!(ph, TT::LBracket);
   ph.advance();
 
   let mut values = Vec::new();
 
   if ph.peek(0) == Some(&TT::LBracket) {
-    return Ok(Value::Raw(Value::Array(values)));
+    return Ok(values);
   }
 
   loop {
-    match ph.peek(0) {
-      Some(TT::String(value)) => values.push(value.clone()),
-      Some(_) => return Err(Error::unexpected(ph)),
-      _ => return Err(Error::end(ph)),
-    };
-
-    ph.advance();
+    values.push(value::parse_inner(ph)?);
 
     match ph.peek(0) {
       Some(TT::Comma) => ph.advance(),
@@ -35,5 +29,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
     };
   }
 
-  Ok(Value::Raw(Value::Array(values)))
+  ph.advance();
+
+  Ok(values)
 }

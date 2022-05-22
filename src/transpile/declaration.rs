@@ -5,7 +5,7 @@ use super::{
 };
 use crate::parse::{
   node::Node,
-  value::{Value, Value},
+  value::Value,
   var::{Declaration, DeclarationType},
 };
 

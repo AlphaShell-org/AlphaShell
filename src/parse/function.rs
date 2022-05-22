@@ -24,8 +24,6 @@ impl Function {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  let mut params = Vec::new();
-
   ph.advance();
 
   let name = match ph.peek(0) {
@@ -39,6 +37,8 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::LParen);
 
   ph.advance();
+
+  let mut params = vec!["__name__".to_owned()]; // $0 is the name of the function
 
   loop {
     match ph.peek(0) {
@@ -57,8 +57,6 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
       None => return Err(Error::end(ph)),
     };
   }
-
-  params.insert(0, "__name__".into()); // $0 is the name of the function
 
   check_token!(ph, TT::RParen);
 

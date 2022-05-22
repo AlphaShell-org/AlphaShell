@@ -6,10 +6,9 @@ pub enum BlockType {
 }
 
 pub struct Transpiler {
-  indent_level: usize,
   indent_char: &'static str,
 
-  block_type: Option<BlockType>,
+  blocks: Vec<BlockType>,
 }
 
 impl Transpiler {
@@ -19,9 +18,8 @@ impl Transpiler {
     block_type: Option<BlockType>,
   ) -> Self {
     Self {
-      indent_level,
       indent_char,
-      block_type,
+      blocks: vec![],
     }
   }
 

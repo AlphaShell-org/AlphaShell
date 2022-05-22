@@ -1,9 +1,9 @@
 use super::{
-  block,
+  block::{self, Block},
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
-  value,
+  value::{self, Value},
 };
 use crate::{check_token, types::TT};
 
@@ -31,12 +31,12 @@ impl For {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Foreach {
   pub variable: String,
-  pub iterable: Box<Node>,
-  pub block: Box<Node>,
+  pub iterable: Value,
+  pub block: Block,
 }
 
 impl Foreach {
-  pub fn new(iterable: Box<Node>, variable: String, block: Box<Node>) -> Self {
+  pub fn new(iterable: Value, variable: String, block: Block) -> Self {
     Self {
       variable,
       iterable,
@@ -88,9 +88,9 @@ fn parse_for(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
 }
 
 fn parse_foreach(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
-  let iterable = Box::new(value::parse(ph)?);
+  let iterable = value::parse_inner(ph)?;
 
-  let block = Box::new(block::parse(ph)?);
+  let block = block::parse_inner(ph)?;
 
   let node = Node::Foreach(Foreach::new(iterable, variable, block));
 

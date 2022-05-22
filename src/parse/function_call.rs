@@ -2,25 +2,26 @@ use super::{
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
+  value::{Literal, Value},
 };
 use crate::{check_token, parse::value, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Next {
-  Call(Box<Node>),
+  Call(Box<FunctionCall>),
   File(String),
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FunctionCall {
-  pub name: String,
-  pub args: Vec<Node>,
-  pub is_daemon: bool,
-  pub next: Option<Next>,
+  name: String,
+  args: Vec<Value>,
+  is_daemon: bool,
+  next: Option<Next>,
 }
 
 impl FunctionCall {
-  pub fn new(name: String, args: Vec<Node>, next: Option<Next>, is_daemon: bool) -> Self {
+  pub fn new(name: String, args: Vec<Value>, next: Option<Next>, is_daemon: bool) -> Self {
     Self {
       name,
       args,
@@ -30,10 +31,18 @@ impl FunctionCall {
   }
 }
 
+enum FType {
+  Call,
+  Aritmetics,
+  String(String),
+}
+
 pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
-  let name = if let Some(token) = ph.peek(0) {
+  let (name, type_) = if let Some(token) = ph.peek(0) {
     match token {
-      TT::Identifier(name) => name.clone(),
+      TT::Identifier(name) => (name.clone(), FType::Call),
+      TT::String(string) => ("echo".to_owned(), FType::String(string.clone())),
+      TT::Dollar => ("$".to_string(), FType::Aritmetics),
       _ => return Err(Error::unexpected(ph)),
     }
   } else {
@@ -42,18 +51,46 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
 
   ph.advance();
 
+  let args = if let FType::String(string) = type_ {
+    vec![Value::Literal(Literal::String(string))]
+  } else {
+    parse_args(ph)?
+  };
+
+  let next = if let Some(TT::Pipe) = ph.peek(0) {
+    ph.advance();
+
+    if let Some(TT::String(string)) = ph.peek(0) {
+      Some(Next::File(string.clone()))
+    } else {
+      Some(Next::Call(Box::new(parse_inner(ph)?)))
+    }
+  } else {
+    None
+  };
+
+  let is_daemon = if matches!(ph.peek(0), Some(TT::Daemon)) {
+    ph.advance();
+    true
+  } else {
+    false
+  };
+
+  Ok(FunctionCall::new(name, args, next, is_daemon))
+}
+
+fn parse_args(ph: &mut ParseHelper) -> Result<Vec<Value>, Error> {
   check_token!(ph, TT::LParen);
 
   ph.advance();
 
   let mut args = vec![];
-
   while let Some(arg) = ph.peek(0) {
     if arg == &TT::RParen {
       break;
     }
 
-    let arg = value::parse(ph)?;
+    let arg = value::parse_inner(ph)?;
 
     args.push(arg);
 
@@ -69,43 +106,16 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
 
   ph.advance();
 
-  let next = if let Some(TT::Pipe) = ph.peek(0) {
-    ph.advance();
-
-    if let Some(TT::String(string)) = ph.peek(0) {
-      Some(Next::File(string.clone()))
-    } else {
-      Some(Next::Call(Box::new(parse(ph)?)))
-    }
-  } else {
-    None
-  };
-
-  let is_daemon = matches!(ph.peek(0), Some(TT::Daemon));
-
-  if is_daemon {
-    ph.advance();
-  }
-
-  Ok(FunctionCall::new(name, args, next, is_daemon))
+  Ok(args)
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Identifier(..));
 
-  let FunctionCall {
-    name,
-    args,
-    is_daemon,
-    next,
-  } = parse_inner(ph)?;
+  let function_call = parse_inner(ph)?;
 
-  if next.is_none() {
-    check_token!(ph, TT::Semicolon);
-    ph.advance();
-  }
-
-  let function_call = FunctionCall::new(name, args, next, is_daemon);
+  check_token!(ph, TT::Semicolon);
+  ph.advance();
 
   Ok(Node::FunctionCall(function_call))
 }

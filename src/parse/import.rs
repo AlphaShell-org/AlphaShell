@@ -1,16 +1,42 @@
-use std::path::Path;
+use std::{fs::File, io::Read, path::Path};
 
 use super::{
   error::{Error, ParserResult},
   node::Node,
   parse_helper::ParseHelper,
 };
-use crate::{check_token, types::TT};
+use crate::{
+  check_token,
+  types::{Token, TT},
+};
+
+fn read_file(path: &Path, token: &Token) -> Result<String, Error> {
+  let mut file = match File::open(path) {
+    Ok(path) => path,
+    Err(e) => {
+      return Err(Error::new(
+        &format!("Couldn't open file '{path:?}', error: '{e}'"),
+        Some(token),
+      ))
+    }
+  };
+
+  let mut contents = String::new();
+
+  match file.read_to_string(&mut contents) {
+    Ok(_) => Ok(contents),
+    Err(e) => Err(Error::new(
+      &format!("Error reading file '{path:?}', error: '{e}'"),
+      Some(token),
+    )),
+  }
+}
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Import | TT::Source);
 
   let static_import = ph.peek(0) == Some(&TT::Import);
+  let token = ph.get(0).cloned().unwrap();
 
   ph.advance();
 
@@ -39,7 +65,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   if static_import {
     let mut imported_trees = vec![];
     for file in files {
-      let contents = crate::read_file(Path::new(&file));
+      let contents = read_file(Path::new(&file), &token)?;
 
       let tokens = match crate::tokenize(&contents) {
         Ok(tokens) => tokens,

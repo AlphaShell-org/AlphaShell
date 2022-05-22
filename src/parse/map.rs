@@ -1,11 +1,11 @@
-use super::{
-  error::ParserResult,
-  parse_helper::ParseHelper,
-  value::{Value, Value},
+use super::{error::ParserResult, parse_helper::ParseHelper, value::Value};
+use crate::{
+  check_token,
+  parse::{error::Error, value},
+  types::TT,
 };
-use crate::{check_token, parse::error::Error, types::TT};
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<(String, Value)>> {
   check_token!(ph, TT::LBrace);
   ph.advance();
 
@@ -24,13 +24,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
 
     ph.advance();
 
-    let value = match ph.peek(0) {
-      Some(TT::String(value)) => value.clone(),
-      Some(_) => return Err(Error::unexpected(ph)),
-      None => return Err(Error::end(ph)),
-    };
-
-    ph.advance();
+    let value = value::parse_inner(ph)?;
 
     items.push((key, value));
 
@@ -42,7 +36,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Value> {
     };
   }
 
-  // ph.advance();
+  ph.advance();
 
-  Ok(Value::Raw(Value::Map(items)))
+  Ok(items)
 }

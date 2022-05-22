@@ -9,7 +9,6 @@ use parse_helper::ParseHelper;
 
 pub mod array;
 pub mod block;
-pub mod condition;
 pub mod r#for;
 pub mod function;
 pub mod function_call;
@@ -39,7 +38,6 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
       While => r#while::parse(&mut ph),
       If => r#if::parse(&mut ph),
       Return => r#return::parse(&mut ph),
-
       Continue => Ok(Node::Continue),
       Break => Ok(Node::Break),
 
@@ -53,7 +51,6 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
           return Err(Error::end(&ph));
         }
       }
-
       _ => return Err(Error::unexpected(&ph)),
     };
 
