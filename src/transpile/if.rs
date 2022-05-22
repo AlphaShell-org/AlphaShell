@@ -1,28 +1,17 @@
 use super::{
   error::{Error, TranspileResult},
   transpiler::Transpiler,
-  value,
 };
-use crate::parse::{
-  node::Node,
-  var::{Declaration, DeclarationType},
-};
+use crate::parse::{node::Node, r#if::If};
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
-    Node::Declaration(Declaration {
-      r#type,
-      name,
-      value,
+    Node::If(If {
+      condition,
+      r#else,
+      block,
     }) => {
-      let type_string = match r#type {
-        DeclarationType::Export => "export",
-        DeclarationType::Let => "local",
-      };
-
-      let value = value::transpile(t, value)?;
-
-      Ok(format!(r#"{type_string} {name}="{value}""#))
+      todo!()
     }
     _ => Err(Error::new("Invalid node type", node)),
   }

@@ -13,8 +13,8 @@ use crate::{
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct While {
-  condition: Value,
-  block: Block,
+  pub condition: Value,
+  pub block: Block,
 }
 
 impl While {

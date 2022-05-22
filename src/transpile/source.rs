@@ -4,17 +4,9 @@ use super::{
 };
 use crate::parse::node::Node;
 
-pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
+pub fn transpile(_t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
-    Node::Source(files) => {
-      let output = files
-        .iter()
-        .map(|file| t.use_indent(&format!("source '{file}'")))
-        .collect::<Vec<_>>()
-        .join(";\n");
-
-      Ok(output)
-    }
+    Node::Source(file) => Ok(format!("source '{file}'")),
     _ => Err(Error::new("Invalid node type", node)),
   }
 }

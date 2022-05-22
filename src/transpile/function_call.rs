@@ -8,14 +8,18 @@ use crate::parse::{
   node::Node,
 };
 
-fn transpile_next(t: &mut Transpiler, next: &Next) -> TranspileResult<String> {
+fn transpile_next(t: &mut Transpiler, next: &Next, node: &Node) -> TranspileResult<String> {
   match next {
-    Next::Call(node) => transpile(t, node),
+    Next::Call(call) => transpile_inner(t, call, node),
     Next::File(file) => Ok(format!(">{file}")),
   }
 }
 
-pub fn transpile_inner(t: &mut Transpiler, call: &FunctionCall) -> TranspileResult<String> {
+pub fn transpile_inner(
+  t: &mut Transpiler,
+  call: &FunctionCall,
+  node: &Node,
+) -> TranspileResult<String> {
   let FunctionCall {
     name,
     args,
@@ -23,12 +27,26 @@ pub fn transpile_inner(t: &mut Transpiler, call: &FunctionCall) -> TranspileResu
     next,
   } = call;
 
+  if name == "$" {
+    t.indent(BlockType::Arithmetics);
+
+    let mut transpiled_args = Vec::new();
+
+    for arg in args {
+      transpiled_args.push(value::transpile_inner(t, arg, node)?);
+    }
+
+    t.deindent();
+
+    return Ok(format!("$(( {} ))", transpiled_args.join(" ")));
+  }
+
   let basic_call = if args.is_empty() {
     name.clone()
   } else {
     let mut transpiled_args = vec![];
     for arg in args {
-      transpiled_args.push(value::transpile(t, arg)?);
+      transpiled_args.push(value::transpile_inner(t, arg, node)?);
     }
     let args = transpiled_args.join(" ");
 
@@ -36,7 +54,7 @@ pub fn transpile_inner(t: &mut Transpiler, call: &FunctionCall) -> TranspileResu
   };
 
   let mut call = if let Some(next) = next {
-    let next = transpile_next(t, next)?;
+    let next = transpile_next(t, next, node)?;
     format!("{basic_call} | {next}")
   } else if *is_daemon {
     format!("{basic_call} &")
@@ -44,7 +62,9 @@ pub fn transpile_inner(t: &mut Transpiler, call: &FunctionCall) -> TranspileResu
     basic_call
   };
 
-  if t.get_block() != &Some(BlockType::Expression) {
+  if t.get_block() == Some(&BlockType::Expression) {
+    call = format!(r#""$({})""#, call);
+  } else {
     call = t.use_indent(&call);
   }
 
@@ -53,7 +73,7 @@ pub fn transpile_inner(t: &mut Transpiler, call: &FunctionCall) -> TranspileResu
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   match node {
-    Node::FunctionCall(call) => transpile_inner(t, call),
+    Node::FunctionCall(call) => transpile_inner(t, call, node),
     _ => Err(Error::new("Invalid node type", node)),
   }
 }

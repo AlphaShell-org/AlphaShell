@@ -12,8 +12,7 @@ use super::{
 pub enum Node {
   Value(Value),
 
-  Source(Vec<String>),
-  ImportedCode(Vec<Node>),
+  Source(String),
   Block(Vec<Node>),
   Function(Function),
   FunctionCall(FunctionCall),
@@ -25,6 +24,8 @@ pub enum Node {
   Return(u8),
   Continue,
   Break,
+
+  Empty,
 }
 
 impl std::fmt::Display for Node {

@@ -4,18 +4,18 @@ let person = "John";
 let c = pwd();
 let people = ["John", "Peter"]; // array
 let map = { foo: "bar", foo2: "baz" }; // associative array (dict)
-let d = a ? "a" : "b";
+//let d = a ? "a" : "b";
 
 // a = 10;
 
 echo(a, b, c);
-echo(people[0]);
-echo(map["foo"][0]);
+//echo(people[0]);
+//echo(map["foo"][0]);
 echo($(a + b)); // interpret as arithmetic
 
-if a <= 10 { echo("Larger than 10"); }
+/*if a <= 10 { echo("Larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
-if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
+if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }*/
 
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }
@@ -23,7 +23,7 @@ for word in ["hello", "world"] { echo(word); }
 for person in people { echo(person); }
 
 let x = 0;
-while x < 10 { echo(x); }
+// while x < 10 { echo(x); }
 
 fn hello(name, age, cwd) {
     echo("Hello ${name} aged ${age}, we're in ${cwd}");
@@ -31,6 +31,7 @@ fn hello(name, age, cwd) {
 
 hello("John", 25, c) | lolcat(); // pipe function output
 let fb = "foobar" | sed("s/bar/baz"); // pipe value
+let ab = $(a - b) | wc(); // pipe value
 
 fn arrayFunction() {
   for a in @ { // @ is args array
@@ -43,13 +44,13 @@ fn arrayFunction() {
 arrayFunction("a", "b", "c", "d", "e");
 
 let string = "abcb";
-if matched ~= "abc{2,5}" { // regex matching
+/*if matched ~= "abc{2,5}" { // regex matching
   echo("matched");
 } elif "abcb" ~= "a[bc]{3,}" {
   echo("matched elif");
 } else {
   echo("not matched");
-}
+}*/
 
 firefox("google.com") &; // run as a daemon
 

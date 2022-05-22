@@ -18,9 +18,9 @@ struct Elif(Node, Node);
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct If {
-  condition: Value,
-  block: Block,
-  r#else: Option<Else>,
+  pub condition: Value,
+  pub block: Block,
+  pub r#else: Option<Else>,
 }
 
 impl If {

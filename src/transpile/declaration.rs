@@ -5,7 +5,7 @@ use super::{
 };
 use crate::parse::{
   node::Node,
-  value::Value,
+  value::{Literal, Value},
   var::{Declaration, DeclarationType},
 };
 
@@ -21,7 +21,7 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
         DeclarationType::Let => "local",
       };
 
-      if let Node::Value(Value::Raw(Value::Map(_))) = **value {
+      if let Node::Value(Value::Literal(Literal::Map(_))) = **value {
         let value = value::transpile(t, value)?;
         return Ok(format!("typeset -A {name}={value}"));
       }

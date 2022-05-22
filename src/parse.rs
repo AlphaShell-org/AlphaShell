@@ -16,7 +16,6 @@ pub mod r#if;
 pub mod import;
 pub mod map;
 pub mod r#return;
-pub mod ternary;
 pub mod value;
 pub mod var;
 pub mod r#while;
@@ -31,7 +30,12 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
 
   while let Some(token) = ph.peek(0) {
     let node = match token {
-      Import | Source => import::parse(&mut ph),
+      Import | Source => {
+        let nodes = import::parse(&mut ph)?;
+        tree.extend_from_slice(&nodes);
+
+        Ok(Node::Empty)
+      }
       Function => r#function::parse(&mut ph),
       Export | Let => var::parse(&mut ph),
       For => r#for::parse(&mut ph),
@@ -54,7 +58,10 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
       _ => return Err(Error::unexpected(&ph)),
     };
 
-    tree.push(node?);
+    match node? {
+      Node::Empty => {}
+      node => tree.push(node),
+    }
   }
 
   Ok(tree)

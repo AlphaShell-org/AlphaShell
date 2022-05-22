@@ -1,7 +1,7 @@
 use super::{
   block,
   error::{Error, TranspileResult},
-  transpiler::Transpiler,
+  transpiler::{BlockType, Transpiler},
 };
 use crate::parse::{function::Function, node::Node};
 
@@ -14,7 +14,7 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
     }) => {
       let head = t.use_indent(&format!("function {name}() {{"));
 
-      t.indent();
+      t.indent(BlockType::Generic);
       let params = params
         .iter()
         .enumerate()

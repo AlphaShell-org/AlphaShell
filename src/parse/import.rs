@@ -32,7 +32,7 @@ fn read_file(path: &Path, token: &Token) -> Result<String, Error> {
   }
 }
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
   check_token!(ph, TT::Import | TT::Source);
 
   let static_import = ph.peek(0) == Some(&TT::Import);
@@ -63,7 +63,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   ph.advance();
 
   if static_import {
-    let mut imported_trees = vec![];
+    let mut imported = vec![];
     for file in files {
       let contents = read_file(Path::new(&file), &token)?;
 
@@ -77,13 +77,12 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
         Err(e) => return Err(e),
       };
 
-      imported_trees.push(Node::Block(tree));
+      imported.extend_from_slice(&tree);
     }
 
-    Ok(Node::ImportedCode(imported_trees))
+    Ok(imported)
   } else {
-    let import = Node::Source(files);
-
+    let import = files.into_iter().map(Node::Source).collect();
     Ok(import)
   }
 }

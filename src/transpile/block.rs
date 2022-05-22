@@ -5,13 +5,13 @@ use super::{
 use crate::parse::node::Node;
 
 pub fn transpile_inner(t: &mut Transpiler, block: &[Node]) -> TranspileResult<String> {
-  if t.get_block() != &Some(BlockType::Import) {
-    t.indent();
+  if t.get_block() != Some(&BlockType::Import) {
+    t.indent(BlockType::Generic);
   }
 
   let block = super::inner(block, t)?;
 
-  if t.get_block() != &Some(BlockType::Import) {
+  if t.get_block() != Some(&BlockType::Import) {
     t.deindent();
   }
 

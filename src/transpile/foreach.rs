@@ -13,12 +13,12 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
       iterable,
       block,
     }) => {
-      t.change_block(BlockType::Foreach);
-      let iterable = value::transpile(t, iterable)?;
-      t.reset_block();
+      t.indent(BlockType::Foreach);
+      let iterable = value::transpile_inner(t, iterable, node)?;
+      t.deindent();
 
       let head = t.use_indent(&format!("for {variable} in {iterable}; do"));
-      let block = block::transpile(t, block)?;
+      let block = block::transpile_inner(t, block)?;
       let end = t.use_indent("done");
 
       let output = format!("{head}\n{block}\n{end}");

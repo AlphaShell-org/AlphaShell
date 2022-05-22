@@ -14,10 +14,10 @@ pub enum Next {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FunctionCall {
-  name: String,
-  args: Vec<Value>,
-  is_daemon: bool,
-  next: Option<Next>,
+  pub name: String,
+  pub args: Vec<Value>,
+  pub is_daemon: bool,
+  pub next: Option<Next>,
 }
 
 impl FunctionCall {
@@ -31,6 +31,7 @@ impl FunctionCall {
   }
 }
 
+#[derive(Debug, PartialEq, Clone)]
 enum FType {
   Call,
   Aritmetics,
@@ -51,8 +52,8 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
 
   ph.advance();
 
-  let args = if let FType::String(string) = type_ {
-    vec![Value::Literal(Literal::String(string))]
+  let args = if let FType::String(string) = &type_ {
+    vec![Value::Literal(Literal::String(string.clone()))]
   } else {
     parse_args(ph)?
   };
@@ -75,6 +76,19 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
   } else {
     false
   };
+
+  if type_ == FType::Aritmetics && next.is_some() {
+    let new = FunctionCall {
+      name: "echo".to_owned(),
+      args: vec![Value::FunctionCall(FunctionCall::new(
+        name, args, None, is_daemon,
+      ))],
+      is_daemon,
+      next,
+    };
+
+    return Ok(new);
+  }
 
   Ok(FunctionCall::new(name, args, next, is_daemon))
 }
@@ -112,10 +126,10 @@ fn parse_args(ph: &mut ParseHelper) -> Result<Vec<Value>, Error> {
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Identifier(..));
 
-  let function_call = parse_inner(ph)?;
+  let fn_call = parse_inner(ph)?;
 
   check_token!(ph, TT::Semicolon);
   ph.advance();
 
-  Ok(Node::FunctionCall(function_call))
+  Ok(Node::FunctionCall(fn_call))
 }
