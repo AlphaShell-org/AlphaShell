@@ -20,9 +20,18 @@ fn transpile_identifier(t: &mut Transpiler, name: &String) -> String {
 
 fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> TranspileResult<String> {
   match value {
-    Literal::String(string) => Ok(format!("\"{string}\"")),
+    Literal::String(string) => {
+      if t.get_block() == Some(&BlockType::Arithmetics) {
+        eprintln!("Warning: String literal inside arithemetic context");
+      }
+
+      Ok(format!("\"{string}\""))
+    }
     Literal::Int(num) => {
-      eprintln!("Warning: Integer literal outside arithemetic context");
+      if t.get_block() != Some(&BlockType::Arithmetics) {
+        eprintln!("Warning: Integer literal outside arithemetic context");
+      }
+
       Ok(num.to_string())
     }
     Literal::Float(num) => Ok(num.to_string()),
@@ -85,6 +94,15 @@ fn transpile_binary_expression(
     let operator = match operator {
       BinaryOperator::Add => "+",
       BinaryOperator::Sub => "-",
+      BinaryOperator::Multiply => "*",
+      BinaryOperator::Divide => "/",
+      BinaryOperator::Modulo => "%",
+      BinaryOperator::Equal => "==",
+      BinaryOperator::NotEqual => "!=",
+      BinaryOperator::Greater => ">",
+      BinaryOperator::GreaterEqual => ">=",
+      BinaryOperator::Less => "<",
+      BinaryOperator::LessEqual => "<=",
       op => todo!("{op:?}"),
     };
 

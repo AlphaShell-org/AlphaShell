@@ -23,7 +23,7 @@ for word in ["hello", "world"] { echo(word); }
 for person in people { echo(person); }
 
 let x = 0;
-// while x < 10 { echo(x); }
+while x < 10 { echo(x); x += 1; }
 
 fn hello(name, age, cwd) {
     echo("Hello ${name} aged ${age}, we're in ${cwd}");
