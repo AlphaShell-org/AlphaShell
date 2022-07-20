@@ -1,7 +1,5 @@
 use crate::types::{Token, TokenType};
 
-// use super::node::Node;
-
 #[derive(Debug)]
 pub struct ParseHelper {
   tokens: Vec<Token>,
@@ -10,11 +8,7 @@ pub struct ParseHelper {
 
 impl ParseHelper {
   pub fn new(tokens: Vec<Token>) -> ParseHelper {
-    ParseHelper {
-      tokens,
-      // tree: Vec::new(),
-      index: 0,
-    }
+    ParseHelper { tokens, index: 0 }
   }
 
   pub fn get(&self, offset: i32) -> Option<&Token> {
