@@ -13,11 +13,10 @@ pub struct Error {
 
 impl Error {
   pub fn new(msg: &str, token: Option<&Token>) -> Self {
-    let err = Error {
+    Error {
       msg: msg.to_string(),
-      token: token.map(Clone::clone),
-    };
-    panic!("{err}");
+      token: token.cloned(),
+    }
   }
 
   pub fn unexpected(ph: &ParseHelper) -> Self {

@@ -6,12 +6,13 @@ use error::TranspileResult;
 
 use self::transpiler::Transpiler;
 use crate::parse::node::Node::{
-  self, Block, Break, Continue, Declaration, Empty, For, Foreach, Function, FunctionCall, If,
-  Return, Source, Value, While,
+  self, Block, Break, Continue, Declaration, Empty, Expression, For, Foreach, Function,
+  FunctionCall, If, Return, Source, Value, While,
 };
 
 mod block;
 mod declaration;
+mod expression;
 mod r#for;
 mod foreach;
 mod function;
@@ -34,6 +35,7 @@ pub fn inner(tree: &[Node], t: &mut Transpiler) -> TranspileResult<String> {
     let code = match node {
       Block(_) => block::transpile(t, node),
       Declaration(_) => declaration::transpile(t, node),
+      Expression(_) => expression::transpile(t, node),
       For(_) => r#for::transpile(t, node),
       Foreach(_) => foreach::transpile(t, node),
       Function(_) => function::transpile(t, node),

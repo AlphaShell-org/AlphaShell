@@ -12,11 +12,10 @@ pub struct Error {
 
 impl Error {
   pub fn new(msg: &str, node: &Node) -> Self {
-    let error = Error {
+    Error {
       msg: msg.to_string(),
       node: node.clone(),
-    };
-    panic!("{error}");
+    }
   }
 }
 

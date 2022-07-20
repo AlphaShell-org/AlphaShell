@@ -17,6 +17,7 @@ pub enum Node {
   Function(Function),
   FunctionCall(FunctionCall),
   Declaration(Declaration),
+  Expression(Value),
   If(If),
   For(For),
   Foreach(Foreach),

@@ -119,13 +119,13 @@ pub enum Literal {
   Map(Vec<(String, Value)>),
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum UnaryOperator {
   Not,
   Minus,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum BinaryOperator {
   Add,
   Sub,
@@ -141,6 +141,14 @@ pub enum BinaryOperator {
   RegexMatch,
   And,
   Or,
+
+  Assignment,
+  AddAssignment,
+  SubAssignment,
+  MultiplyAssignment,
+  DivideAssignment,
+  ModuloAssignment,
+  PowerAssignment,
 }
 
 impl BinaryOperator {
@@ -160,6 +168,14 @@ impl BinaryOperator {
       TT::RegexMatch => Some(BinaryOperator::RegexMatch),
       TT::And => Some(BinaryOperator::And),
       TT::Or => Some(BinaryOperator::Or),
+      TT::Assignment => Some(BinaryOperator::Assignment),
+      TT::AddAssignment => Some(BinaryOperator::AddAssignment),
+      TT::SubAssignment => Some(BinaryOperator::SubAssignment),
+      TT::MultiplyAssignment => Some(BinaryOperator::MultiplyAssignment),
+      TT::DivideAssignment => Some(BinaryOperator::DivideAssignment),
+      TT::ModuloAssignment => Some(BinaryOperator::ModuloAssignment),
+      TT::PowerAssignment => Some(BinaryOperator::PowerAssignment),
+
       _ => None,
     }
   }

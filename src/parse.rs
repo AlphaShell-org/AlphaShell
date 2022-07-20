@@ -9,6 +9,7 @@ use parse_helper::ParseHelper;
 
 pub mod array;
 pub mod block;
+pub mod expression;
 pub mod r#for;
 pub mod function;
 pub mod function_call;
@@ -45,11 +46,11 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
       Continue => Ok(Node::Continue),
       Break => Ok(Node::Break),
 
-      Identifier(..) => {
+      Identifier(..) | Dollar => {
         if let Some(next) = ph.peek(1) {
           match next {
             LParen => function_call::parse(&mut ph),
-            _ => value::parse(&mut ph),
+            _ => expression::parse(&mut ph),
           }
         } else {
           return Err(Error::end(&ph));

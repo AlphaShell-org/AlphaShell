@@ -2,11 +2,15 @@
 pub enum BlockType {
   Foreach,
   Expression,
-  Import,
   Generic,
   Arithmetics,
+  Identifier,
+  FunctionCall,
+  Condition,
+  Raw,
 }
 
+#[derive(Debug)]
 pub struct Transpiler {
   indent_char: &'static str,
 
@@ -26,11 +30,11 @@ impl Transpiler {
     format!("{indent}{str}")
   }
 
-  pub fn indent(&mut self, block: BlockType) {
+  pub fn push_block(&mut self, block: BlockType) {
     self.blocks.push(block);
   }
 
-  pub fn deindent(&mut self) {
+  pub fn pop_block(&mut self) {
     debug_assert!(!self.blocks.is_empty(), "deindent at 0 indent_level");
 
     self.blocks.pop();
@@ -38,5 +42,9 @@ impl Transpiler {
 
   pub fn get_block(&self) -> Option<&BlockType> {
     self.blocks.last()
+  }
+
+  pub fn search(&self, block: &BlockType) -> bool {
+    self.blocks.iter().any(|b| b == block)
   }
 }

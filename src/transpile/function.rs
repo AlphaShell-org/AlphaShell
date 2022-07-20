@@ -14,13 +14,13 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
     }) => {
       let head = t.use_indent(&format!("function {name}() {{"));
 
-      t.indent(BlockType::Generic);
+      t.push_block(BlockType::Generic);
       let params = params
         .iter()
         .enumerate()
         .map(|(i, param)| t.use_indent(&format!("local {param}=${i}\n")))
         .collect::<String>();
-      t.deindent();
+      t.pop_block();
 
       let block = block::transpile(t, block)?;
       let end = t.use_indent("}");

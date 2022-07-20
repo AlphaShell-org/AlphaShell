@@ -5,15 +5,9 @@ use super::{
 use crate::parse::node::Node;
 
 pub fn transpile_inner(t: &mut Transpiler, block: &[Node]) -> TranspileResult<String> {
-  if t.get_block() != Some(&BlockType::Import) {
-    t.indent(BlockType::Generic);
-  }
-
+  t.push_block(BlockType::Generic);
   let block = super::inner(block, t)?;
-
-  if t.get_block() != Some(&BlockType::Import) {
-    t.deindent();
-  }
+  t.pop_block();
 
   Ok(block)
 }

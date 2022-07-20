@@ -11,28 +11,33 @@ use crate::parse::{
 };
 
 fn transpile_identifier(t: &mut Transpiler, name: &String) -> String {
-  if let Some(BlockType::Arithmetics) = t.get_block() {
+  if t.search(&BlockType::Identifier) || t.search(&BlockType::Arithmetics) {
     name.clone()
   } else {
-    format!("${{{}}}", name)
+    format!("\"${{{name}}}\"")
   }
 }
 
 fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> TranspileResult<String> {
   match value {
     Literal::String(string) => {
-      if t.get_block() == Some(&BlockType::Arithmetics) {
+      if t.search(&BlockType::Arithmetics) {
         eprintln!("Warning: String literal inside arithemetic context");
       }
 
-      Ok(format!("\"{string}\""))
+      if t.search(&BlockType::Raw) {
+        Ok(string.clone())
+      } else {
+        Ok(format!("\"{string}\""))
+      }
     }
     Literal::Int(num) => {
-      if t.get_block() != Some(&BlockType::Arithmetics) {
+      if t.search(&BlockType::Arithmetics) || t.search(&BlockType::Raw) {
+        Ok(num.to_string())
+      } else {
         eprintln!("Warning: Integer literal outside arithemetic context");
+        Ok(format!("\"{num}\""))
       }
-
-      Ok(num.to_string())
     }
     Literal::Float(num) => Ok(num.to_string()),
     Literal::Array(array) => {
@@ -44,7 +49,7 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
 
       let items = items.join(" ");
 
-      if t.get_block() == Some(&BlockType::Foreach) {
+      if matches!(t.get_block(), Some(BlockType::Foreach)) {
         Ok(items)
       } else {
         Ok(format!("({items})"))
@@ -56,12 +61,7 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
       let mut transpiled = String::new();
 
       for (key, value) in map {
-        write!(
-          transpiled,
-          "[{key}]='{}' ",
-          transpile_inner(t, value, node)?
-        )
-        .unwrap();
+        write!(transpiled, "[{key}]={} ", transpile_inner(t, value, node)?).unwrap();
       }
 
       Ok(format!("({})", transpiled))
@@ -90,19 +90,21 @@ fn transpile_binary_expression(
   right: &Value,
   node: &Node,
 ) -> TranspileResult<String> {
-  if t.get_block() == Some(&BlockType::Arithmetics) {
+  if matches!(t.get_block(), Some(BlockType::Arithmetics)) {
     let operator = match operator {
       BinaryOperator::Add => "+",
       BinaryOperator::Sub => "-",
       BinaryOperator::Multiply => "*",
       BinaryOperator::Divide => "/",
       BinaryOperator::Modulo => "%",
-      BinaryOperator::Equal => "==",
-      BinaryOperator::NotEqual => "!=",
-      BinaryOperator::Greater => ">",
-      BinaryOperator::GreaterEqual => ">=",
-      BinaryOperator::Less => "<",
-      BinaryOperator::LessEqual => "<=",
+
+      BinaryOperator::Assignment => "=",
+      BinaryOperator::AddAssignment => "+=",
+      BinaryOperator::SubAssignment => "-=",
+      BinaryOperator::MultiplyAssignment => "*=",
+      BinaryOperator::DivideAssignment => "/=",
+      BinaryOperator::ModuloAssignment => "%=",
+      BinaryOperator::PowerAssignment => "**=",
       op => todo!("{op:?}"),
     };
 
@@ -111,16 +113,54 @@ fn transpile_binary_expression(
       transpile_inner(t, left, node)?,
       transpile_inner(t, right, node)?
     ))
+  } else if t.search(&BlockType::Condition) {
+    let operator = match operator {
+      BinaryOperator::Add => "+",
+      BinaryOperator::Sub => "-",
+      BinaryOperator::Multiply => "*",
+      BinaryOperator::Divide => "/",
+      BinaryOperator::Modulo => "%",
+      BinaryOperator::Equal => "==",
+      BinaryOperator::NotEqual => "!=",
+      BinaryOperator::Greater => "-gt",
+      BinaryOperator::GreaterEqual => "-ge",
+      BinaryOperator::Less => "-lt",
+      BinaryOperator::LessEqual => "-le",
+      BinaryOperator::RegexMatch => "=~",
+      BinaryOperator::And => "&&",
+      BinaryOperator::Or => "||",
+
+      op => return Err(Error::new(&format!("Unexpected operator: {op:?}"), node)),
+    };
+
+    Ok(format!(
+      "{} {operator} {}",
+      transpile_inner(t, left, node)?,
+      transpile_inner(t, right, node)?
+    ))
+  } else if operator == &BinaryOperator::Assignment {
+    if matches!(left, Value::Identifier(..) | Value::MemberExpression(..)) {
+      t.push_block(BlockType::Identifier);
+      let identifier = transpile_inner(t, left, node)?;
+      t.pop_block();
+
+      let value = transpile_inner(t, right, node)?;
+
+      Ok(format!("{identifier}={value}"))
+    } else {
+      Err(Error::new("Cannot assign to this expression", node))
+    }
   } else {
+    // string mode
     match operator {
-      BinaryOperator::Add => {}
+      BinaryOperator::Add => "",
       _ => {
         return Err(Error::new(
           &format!("Operator not supported in string mode: {operator:?}"),
           node,
         ))
       }
-    }
+    };
 
     Ok(format!(
       "{}{}",
@@ -130,14 +170,70 @@ fn transpile_binary_expression(
   }
 }
 
+fn transpile_ternary_expression(
+  t: &mut Transpiler,
+  condition: &Value,
+  left: &Value,
+  right: &Value,
+  node: &Node,
+) -> TranspileResult<String> {
+  t.push_block(BlockType::Condition);
+  let condition = transpile_inner(t, condition, node)?;
+  t.pop_block();
+
+  let left = transpile_inner(t, left, node)?;
+  let right = transpile_inner(t, right, node)?;
+
+  let transpiled = format!("if [[ {condition} ]]; then; echo {left}; else; echo {right}; fi");
+
+  if matches!(t.get_block(), Some(BlockType::Generic)) {
+    Ok(transpiled)
+  } else {
+    Ok(format!("$({transpiled})"))
+  }
+}
+
+fn transpile_member_expression(
+  t: &mut Transpiler,
+
+  left: &Value,
+  right: &Value,
+  node: &Node,
+) -> TranspileResult<String> {
+  t.push_block(BlockType::Identifier);
+  let left = transpile_inner(t, left, node)?;
+  t.pop_block();
+
+  t.push_block(BlockType::Raw);
+  let right = transpile_inner(t, right, node)?;
+  t.pop_block();
+
+  let transpiled = format!("{left}[{right}]");
+
+  if matches!(
+    t.get_block(),
+    Some(BlockType::Generic | BlockType::Identifier)
+  ) {
+    Ok(transpiled)
+  } else {
+    Ok(format!("${{{transpiled}}}"))
+  }
+}
+
 pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> TranspileResult<String> {
   let indent = !matches!(
     t.get_block(),
-    Some(BlockType::Expression | BlockType::Arithmetics)
+    Some(
+      BlockType::Expression
+        | BlockType::Arithmetics
+        | BlockType::Identifier
+        | BlockType::Foreach
+        | BlockType::Condition
+    )
   );
 
   if indent {
-    t.indent(BlockType::Expression);
+    t.push_block(BlockType::Expression);
   }
 
   let value = match value {
@@ -147,13 +243,15 @@ pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> Transp
     Value::BinaryExpression(left, operator, right) => {
       transpile_binary_expression(t, left, operator, right, node)
     }
-    Value::TernaryExpression(_, _, _) => todo!(),
-    Value::MemberExpression(_, _) => todo!(),
+    Value::TernaryExpression(condition, left, right) => {
+      transpile_ternary_expression(t, condition, left, right, node)
+    }
+    Value::MemberExpression(left, right) => transpile_member_expression(t, left, right, node),
     Value::FunctionCall(function_call) => function_call::transpile_inner(t, function_call, node),
   };
 
   if indent {
-    t.deindent();
+    t.pop_block();
   }
 
   value

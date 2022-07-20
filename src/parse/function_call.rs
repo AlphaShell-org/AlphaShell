@@ -124,7 +124,7 @@ fn parse_args(ph: &mut ParseHelper) -> Result<Vec<Value>, Error> {
 }
 
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  check_token!(ph, TT::Identifier(..));
+  check_token!(ph, TT::Identifier(..) | TT::Dollar);
 
   let fn_call = parse_inner(ph)?;
 

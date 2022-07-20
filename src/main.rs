@@ -45,67 +45,43 @@ fn main() {
   };
 
   for path in files {
-    if let ControlFlow::Break(_) = run_for_file(Path::new(&path), Path::new("./build")) {
+    if let ControlFlow::Break(error) = run_for_file(Path::new(&path), Path::new("./build")) {
+      eprintln!("{error}");
       return;
     }
   }
 }
 
-macro_rules! time {
-  ($name:expr, $b:block) => {{
-    let start = std::time::Instant::now();
-    let result = $b;
-    let duration = start.elapsed();
-    println!("{} done in {duration:?}", $name);
-    result
-  }};
-}
-
-fn run_for_file(input_file: &Path, output_path: &Path) -> ControlFlow<()> {
+fn run_for_file(input_file: &Path, output_path: &Path) -> ControlFlow<String> {
   let start = Instant::now();
 
   let mut new_path = output_path.join(input_file.file_name().unwrap());
   new_path.set_extension("zsh");
 
-  println!("\nTranspiling {input_file:?} => {new_path:?}\n");
+  println!("\nTranspiling {input_file:?} => {new_path:?}");
 
   let contents = read_file(input_file);
 
-  let tokens = time!("Lexing", {
-    match tokenize(&contents) {
-      Ok(tokens) => tokens,
-      Err(e) => {
-        eprintln!("{e}");
-        return ControlFlow::Break(());
-      }
-    }
-  });
+  let tokens = match tokenize(&contents) {
+    Ok(tokens) => tokens,
+    Err(e) => return ControlFlow::Break(format!("{e}")),
+  };
 
-  let tree = time!("Parsing", {
-    match parse(&tokens) {
-      Ok(tree) => tree,
-      Err(e) => {
-        eprintln!("{e}");
-        return ControlFlow::Break(());
-      }
-    }
-  });
+  let tree = match parse(&tokens) {
+    Ok(tree) => tree,
+    Err(e) => return ControlFlow::Break(format!("{e}")),
+  };
 
-  let code = time!("Transpiling", {
-    match transpile(&tree) {
-      Ok(code) => code,
-      Err(e) => {
-        eprintln!("{e}");
-        return ControlFlow::Break(());
-      }
-    }
-  });
+  let code = match transpile(&tree) {
+    Ok(code) => code,
+    Err(e) => return ControlFlow::Break(format!("{e}")),
+  };
 
   write_file(&new_path, &code);
 
   let duration = start.elapsed();
 
-  println!("\nTotal time for {input_file:?}: {duration:?}\n");
+  println!("\nDone in: {duration:?}\n");
 
   ControlFlow::Continue(())
 }

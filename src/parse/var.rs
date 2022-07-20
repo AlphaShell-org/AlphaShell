@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{check_token, types::TT};
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DeclarationType {
   Let,
   Export,

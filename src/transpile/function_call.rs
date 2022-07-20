@@ -28,7 +28,7 @@ pub fn transpile_inner(
   } = call;
 
   if name == "$" {
-    t.indent(BlockType::Arithmetics);
+    t.push_block(BlockType::Arithmetics);
 
     let mut transpiled_args = Vec::new();
 
@@ -36,9 +36,15 @@ pub fn transpile_inner(
       transpiled_args.push(value::transpile_inner(t, arg, node)?);
     }
 
-    t.deindent();
+    t.pop_block();
 
-    return Ok(format!("$(( {} ))", transpiled_args.join(" ")));
+    let args = transpiled_args.join(" ");
+
+    if matches!(t.get_block(), Some(BlockType::Generic)) {
+      return Ok(t.use_indent(&format!("(( {args} ))")));
+    }
+
+    return Ok(format!("$(( {} ))", args));
   }
 
   let basic_call = if args.is_empty() {
@@ -53,8 +59,10 @@ pub fn transpile_inner(
     format!("{name} {args}")
   };
 
-  let mut call = if let Some(next) = next {
+  let call = if let Some(next) = next {
+    t.push_block(BlockType::FunctionCall);
     let next = transpile_next(t, next, node)?;
+    t.pop_block();
     format!("{basic_call} | {next}")
   } else if *is_daemon {
     format!("{basic_call} &")
@@ -62,11 +70,11 @@ pub fn transpile_inner(
     basic_call
   };
 
-  if t.get_block() == Some(&BlockType::Expression) {
-    call = format!(r#""$({})""#, call);
-  } else {
-    call = t.use_indent(&call);
-  }
+  let call = match t.get_block() {
+    Some(BlockType::FunctionCall) => call,
+    Some(BlockType::Expression) => format!(r#""$({})""#, call),
+    _ => t.use_indent(&call),
+  };
 
   Ok(call)
 }
