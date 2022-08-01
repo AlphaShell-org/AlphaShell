@@ -223,7 +223,13 @@ fn load_string(state: &mut State) -> Result<Token> {
   // omit ending quote
   state.advance();
 
-  Ok(Token::new(TT::String(buf), Position(state.line, start)))
+  let token_type = match quote_type {
+    '"' => TT::String(buf),
+    '\'' => TT::RawString(buf),
+    _ => return Err(Error::new("Invalid string quote type", state)),
+  };
+
+  Ok(Token::new(token_type, Position(state.line, start)))
 }
 
 fn load_operator(state: &mut State) -> Result<Token> {
@@ -404,7 +410,7 @@ fn tokenize_line(state: &mut State) -> Result<()> {
       continue;
     }
 
-    // let strings
+    // strings
     if state.char() == '"' || state.char() == '\'' {
       let token = load_string(state)?;
       state.tokens.push(token);

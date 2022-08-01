@@ -36,6 +36,7 @@ enum FType {
   Call,
   Aritmetics,
   String(String),
+  RawString(String),
 }
 
 pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
@@ -43,6 +44,7 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
     match token {
       TT::Identifier(name) => (name.clone(), FType::Call),
       TT::String(string) => ("echo".to_owned(), FType::String(string.clone())),
+      TT::RawString(string) => ("echo".to_owned(), FType::RawString(string.clone())),
       TT::Dollar => ("$".to_string(), FType::Aritmetics),
       _ => return Err(Error::unexpected(ph)),
     }
@@ -52,10 +54,10 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
 
   ph.advance();
 
-  let args = if let FType::String(string) = &type_ {
-    vec![Value::Literal(Literal::String(string.clone()))]
-  } else {
-    parse_args(ph)?
+  let args = match &type_ {
+    FType::String(string) => vec![Value::Literal(Literal::String(string.clone()))],
+    FType::RawString(string) => vec![Value::Literal(Literal::RawString(string.clone()))],
+    _ => parse_args(ph)?,
   };
 
   let next = if let Some(TT::Pipe) = ph.peek(0) {

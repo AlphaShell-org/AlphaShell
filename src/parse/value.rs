@@ -16,6 +16,7 @@ pub enum Literal {
   Int(i32),
   Float(f32),
   String(String),
+  RawString(String),
   Array(Vec<Value>),
   Map(Vec<(String, Value)>),
 }
@@ -120,11 +121,23 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
       ph.advance();
       Ok(Value::Literal(Literal::String(string)))
     }
+
+    Some(TT::RawString(string)) => {
+      if ph.peek(1) == Some(&TT::Pipe) {
+        return Ok(Value::FunctionCall(function_call::parse_inner(ph)?));
+      }
+
+      let string = string.clone();
+      ph.advance();
+      Ok(Value::Literal(Literal::RawString(string)))
+    }
+
     Some(TT::Integer(num)) => {
       let num = *num;
       ph.advance();
       Ok(Value::Literal(Literal::Int(num)))
     }
+
     Some(TT::Float(num)) => {
       let num = *num;
       ph.advance();

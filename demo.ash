@@ -12,6 +12,9 @@ echo(people[0]);
 echo(map["foo"]);
 echo($(a + b)); // interpret as arithmetic
 
+echo("a: ${a}"); // string interpolation
+echo('a: ${a}'); // raw string
+
 if a <= 10 { echo("Larger than 10"); }
 
 for a in 0..5 { echo(a); } // start..end[..step]

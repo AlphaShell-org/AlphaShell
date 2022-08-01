@@ -22,7 +22,7 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
   match value {
     Literal::String(string) => {
       if t.search(&BlockType::Arithmetics) {
-        eprintln!("Warning: String literal inside arithemetic context");
+        eprintln!("Warning: String literal inside arithmetic context");
       }
 
       if t.search(&BlockType::Raw) {
@@ -31,11 +31,22 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
         Ok(format!("\"{string}\""))
       }
     }
+    Literal::RawString(string) => {
+      if t.search(&BlockType::Arithmetics) {
+        eprintln!("Warning: RawString literal inside arithmetic context");
+      }
+
+      if t.search(&BlockType::Raw) {
+        Ok(string.clone())
+      } else {
+        Ok(format!("'{string}'"))
+      }
+    }
     Literal::Int(num) => {
       if t.search(&BlockType::Arithmetics) || t.search(&BlockType::Raw) {
         Ok(num.to_string())
       } else {
-        eprintln!("Warning: Integer literal outside arithemetic context");
+        eprintln!("Warning: Integer literal outside arithmetic context");
         Ok(format!("\"{num}\""))
       }
     }

@@ -22,6 +22,9 @@ echo(map["foo"]);
 
 echo($(a + b)); // interpret as arithmetic
 
+echo("a: ${a}"); // string interpolation
+echo('a: ${a}'); // raw string
+
 if a > 10 { echo("a is arger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }

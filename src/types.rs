@@ -30,6 +30,7 @@ pub enum TokenType {
   Float(f32),
 
   String(String),
+  RawString(String),
   Identifier(String),
 
   // Keywords
