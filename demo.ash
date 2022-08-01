@@ -50,6 +50,6 @@ if matched ~= "abc{2,5}" { // regex matching
 
 firefox("google.com") &; // run as a daemon
 
-import "test/test2.bzs"; // transpile time import - similar to `#include`
+import "test/test2.ash"; // transpile time import - similar to `#include`
 
 source "another_folder/file.zsh"; // runtime import, just like source in zsh

@@ -1,1 +1,1 @@
-# better-zsh
+# AlphaShell

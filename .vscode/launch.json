@@ -9,13 +9,20 @@
       "request": "launch",
       "name": "Debug executable 'better-zsh'",
       "cargo": {
-        "args": ["build", "--bin=better-zsh", "--package=better-zsh"],
+        "args": [
+          "build",
+          "--bin=better-zsh",
+          "--package=better-zsh"
+        ],
         "filter": {
           "name": "better-zsh",
           "kind": "bin"
         }
       },
-      "args": ["${workspaceFolder}/test/test.bzs", "${workspaceFolder}/test/test3.bzs"],
+      "args": [
+        "${workspaceFolder}/test/test.ash",
+        "${workspaceFolder}/test/test3.ash"
+      ],
       "cwd": "${workspaceFolder}"
     },
     {
@@ -23,7 +30,12 @@
       "request": "launch",
       "name": "Debug unit tests in executable 'better-zsh'",
       "cargo": {
-        "args": ["test", "--no-run", "--bin=better-zsh", "--package=better-zsh"],
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=better-zsh",
+          "--package=better-zsh"
+        ],
         "filter": {
           "name": "better-zsh",
           "kind": "bin"
