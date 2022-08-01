@@ -23,9 +23,6 @@ use parse::parse;
 mod transpile;
 use transpile::transpile;
 
-#[macro_use]
-mod utils;
-
 fn main() {
   let files = env::args().skip(1);
 
