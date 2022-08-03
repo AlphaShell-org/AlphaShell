@@ -1,0 +1,77 @@
+name: Build and upload binaries to release
+
+on:
+  push:
+    tags:
+      - v[0-9].*
+
+jobs:
+  build-and-release:
+    name: Build and release
+    strategy:
+      matrix:
+        target:
+          [
+            aarch64-unknown-linux-gnu,
+            x86_64-unknown-linux-gnu,
+            x86_64-pc-windows-msvc,
+            aarch64-apple-darwin,
+            x86_64-apple-darwin
+          ]
+        include:
+          - target: aarch64-unknown-linux-gnu
+            archive-type: tar.xz
+            os: ubuntu-latest
+            use-cross: true
+
+          - target: x86_64-unknown-linux-gnu
+            archive-type: tar.xz
+            os: ubuntu-latest
+
+          - target: x86_64-pc-windows-msvc
+            archive-type: zip
+            file-extension: .exe
+            os: windows-latest
+
+          - target: aarch64-apple-darwin
+            archive-type: zip
+            os: macos-latest
+            use-cross: true
+
+          - target: x86_64-apple-darwin
+            archive-type: zip
+            os: macos-latest
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install nightly toolchain
+        run: rustup default nightly
+
+      - name: Install target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Build project with cargo
+        if: ${{ !matrix.use-cross }}
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Install cross-compiler
+        if: ${{ matrix.use-cross }}
+        run: cargo install cross
+
+      - name: Build project with cross
+        if: ${{ matrix.use-cross }}
+        run: cross build --release --locked --target ${{ matrix.target }}
+
+      - name: Create archive with the binary
+        run: tar caf ash_${{ matrix.target }}.${{ matrix.archive-type }} --directory=target/${{ matrix.target }}/release ash${{ matrix.file-extension }}
+
+      - name: Upload binary to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ash_${{ matrix.target }}.${{ matrix.archive-type }}
+          asset_name: ash_${{ matrix.target }}.${{ matrix.archive-type }}
+          tag: ${{ github.ref }}
