@@ -22,7 +22,7 @@ jobs:
           - target: aarch64-unknown-linux-gnu
             archive-type: tar.xz
             os: ubuntu-latest
-            use-cross: true
+            crosscompile: true
 
           - target: x86_64-unknown-linux-gnu
             archive-type: tar.xz
@@ -36,39 +36,62 @@ jobs:
           - target: aarch64-apple-darwin
             archive-type: zip
             os: macos-latest
-            use-cross: true
+            crosscompile: true
 
           - target: x86_64-apple-darwin
             archive-type: zip
             os: macos-latest
 
     runs-on: ${{ matrix.os }}
+    env:
+      archive: ash_${{ matrix.target }}.${{ matrix.archive-type }}
+      binary: ash${{ matrix.file-extension }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install target
-        run: rustup target add ${{ matrix.target }}
+      - name: Cache cargo and rustup
+        id: cache-cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ~/.rustup/toolchains
+          key: ${{ matrix.target }}-cargo
+
+      - name: Cache target folder
+        id: cache-target
+        uses: actions/cache@v3
+        with:
+          path: target/
+          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build project with cargo
-        if: ${{ !matrix.use-cross }}
+        if: ${{ !matrix.crosscompile }}
         run: cargo build --release --locked --target ${{ matrix.target }}
 
+      - name: Install target
+        if: ${{ matrix.crosscompile && steps.cache-cargo.outputs.cache-hit != 'true' }}
+        run: rustup target add ${{ matrix.target }}
+
       - name: Install cross-compiler
-        if: ${{ matrix.use-cross }}
+        if: ${{ matrix.crosscompile && steps.cache-cargo.outputs.cache-hit != 'true' }}
         run: cargo install cross
 
       - name: Build project with cross
-        if: ${{ matrix.use-cross }}
+        if: ${{ matrix.crosscompile }}
         run: cross build --release --locked --target ${{ matrix.target }}
 
       - name: Create archive with the binary
-        run: tar caf ash_${{ matrix.target }}.${{ matrix.archive-type }} --directory=target/${{ matrix.target }}/release ash${{ matrix.file-extension }}
+        run: tar caf ${{ env.archive }} --directory=target/${{ matrix.target }}/release ${{ env.binary }}
 
       - name: Upload binary to release
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ash_${{ matrix.target }}.${{ matrix.archive-type }}
-          asset_name: ash_${{ matrix.target }}.${{ matrix.archive-type }}
+          file: ${{ env.archive }}
+          asset_name: ${{ env.archive }}
           tag: ${{ github.ref }}
