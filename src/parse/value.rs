@@ -96,7 +96,7 @@ pub enum Value {
 
 fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
   let token = ph.peek(0);
-  let value = match token {
+  let mut value = match token {
     Some(TT::Identifier(..) | TT::Dollar) if ph.peek(1) == Some(&TT::LParen) => {
       Ok(Value::FunctionCall(function_call::parse_inner(ph)?))
     }
@@ -166,14 +166,19 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
     None => Err(Error::end(ph)),
   };
 
-  let mut value = value;
+  while let Ok(val) = &value {
+    if ph.peek(0) != Some(&TT::LBracket) {
+      break;
+    }
 
-  while let Ok(val) = &value && ph.peek(0) == Some(&TT::LBracket) {
     ph.advance();
 
     let member = parse_single(ph)?;
 
-    value = Ok(Value::MemberExpression(Box::new(val.clone()), Box::new(member)));
+    value = Ok(Value::MemberExpression(
+      Box::new(val.clone()),
+      Box::new(member),
+    ));
 
     check_token!(ph, TT::RBracket);
 
