@@ -16,15 +16,15 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
       name,
       value,
     }) => {
-      let type_string = match r#type {
-        DeclarationType::Export => "export",
-        DeclarationType::Let => "local",
-      };
-
       if let Node::Value(Value::Literal(Literal::Map(_))) = **value {
         let value = value::transpile(t, value)?;
         return Ok(format!("typeset -A {name}={value}"));
       }
+
+      let type_string = match r#type {
+        DeclarationType::Export => "export",
+        DeclarationType::Let => "local",
+      };
 
       let value = value::transpile(t, value)?;
 
