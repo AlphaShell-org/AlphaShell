@@ -41,9 +41,17 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
 
   let mut files = Vec::new();
 
+  match ph.peek(0) {
+    Some(TT::String(string)) => files.push(string.clone()),
+    Some(_) => return Err(Error::unexpected(ph)),
+    None => return Err(Error::end(ph)),
+  };
+
+  ph.advance();
+
   loop {
     match ph.peek(0) {
-      Some(TT::String(string)) => files.push(string.clone()),
+      Some(TT::Comma) => ph.advance(),
       Some(TT::Semicolon) => break,
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
@@ -52,8 +60,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
     ph.advance();
 
     match ph.peek(0) {
-      Some(TT::Comma) => ph.advance(),
-      Some(TT::Semicolon) => break,
+      Some(TT::String(string)) => files.push(string.clone()),
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
     };
