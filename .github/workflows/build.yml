@@ -10,88 +10,115 @@ jobs:
     name: Build and release
     strategy:
       matrix:
-        target:
-          [
-            aarch64-unknown-linux-gnu,
-            x86_64-unknown-linux-gnu,
-            x86_64-pc-windows-msvc,
-            aarch64-apple-darwin,
-            x86_64-apple-darwin
-          ]
-        include:
+        job:
           - target: aarch64-unknown-linux-gnu
-            archive-type: tar.xz
             os: ubuntu-latest
-            crosscompile: true
+
+          - target: i686-unknown-linux-gnu
+            os: ubuntu-latest
 
           - target: x86_64-unknown-linux-gnu
-            archive-type: tar.xz
             os: ubuntu-latest
 
-          - target: x86_64-pc-windows-msvc
-            archive-type: zip
-            file-extension: .exe
-            os: windows-latest
-
           - target: aarch64-apple-darwin
-            archive-type: zip
             os: macos-latest
-            crosscompile: true
 
           - target: x86_64-apple-darwin
-            archive-type: zip
             os: macos-latest
 
-    runs-on: ${{ matrix.os }}
-    env:
-      archive: ash_${{ matrix.target }}.${{ matrix.archive-type }}
-      binary: ash${{ matrix.file-extension }}
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+
+          - target: i686-pc-windows-msvc
+            os: windows-latest
+
+    runs-on: ${{ matrix.job.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Cache cargo and rustup
-        id: cache-cargo
-        uses: actions/cache@v3
+      - name: Install prerequisites
+        shell: bash
+        run: |
+          case ${{ matrix.job.target }} in
+            aarch64-*-linux-*) sudo apt-get -y update ; sudo apt-get -y install binutils-aarch64-linux-gnu ;;
+          esac
+
+      - name: Initialize workflow variables
+        id: vars
+        shell: bash
+        run: |
+          TARGET=${{ matrix.job.target }}
+
+          case $TARGET in
+            *-pc-windows-*) BINARY="ash.exe" ;;
+            *)              BINARY="ash" ;;
+          esac;
+
+          echo set-output name=BINARY::${BINARY}
+          echo ::set-output name=BINARY::${BINARY}
+
+
+          case $TARGET in
+            x86_64-*) CROSS="false" ;;
+            *)        CROSS="true" ;;
+          esac;
+
+          echo set-output name=CROSS::${CROSS}
+          echo ::set-output name=CROSS::${CROSS}
+
+
+          case $TARGET in
+            *-linux-*) ARCHIVE="ash_$TARGET.tar.gz" ;;
+            *)         ARCHIVE="ash_$TARGET.zip" ;;
+          esac;
+
+          echo set-output name=ARCHIVE::${ARCHIVE}
+          echo ::set-output name=ARCHIVE::${ARCHIVE}
+
+
+          RELEASE="target/${{ matrix.job.target }}/release"
+
+          echo set-output name=RELEASE::${RELEASE}
+          echo ::set-output name=RELEASE::${RELEASE}
+
+
+          case ${{ matrix.job.target }} in
+            aarch64-*-linux-*) STRIP="aarch64-linux-gnu-strip" ;;
+            *-pc-windows-msvc) STRIP="" ;;
+            *)                 STRIP="strip"
+          esac;
+
+          echo set-output name=STRIP::${STRIP}
+          echo ::set-output name=STRIP::${STRIP}
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
         with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            ~/.rustup/toolchains
-          key: ${{ matrix.target }}-cargo
+          toolchain: stable
+          target: ${{ matrix.job.target }}
+          profile: minimal
+          override: true
 
-      - name: Cache target folder
-        id: cache-target
-        uses: actions/cache@v3
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
-          path: target/
-          key: ${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          use-cross: ${{ steps.vars.outputs.CROSS }}
+          command: build
+          args: --release --locked --target=${{ matrix.job.target }}
 
-      - name: Build project with cargo
-        if: ${{ !matrix.crosscompile }}
-        run: cargo build --release --locked --target ${{ matrix.target }}
+      - name: Strip the binary
+        if: ${{ steps.vars.outputs.STRIP }}
+        run: ${{ steps.vars.outputs.STRIP }} '${{ steps.vars.outputs.RELEASE }}/${{ steps.vars.outputs.BINARY }}'
 
-      - name: Install target
-        if: ${{ matrix.crosscompile && steps.cache-cargo.outputs.cache-hit != 'true' }}
-        run: rustup target add ${{ matrix.target }}
-
-      - name: Install cross-compiler
-        if: ${{ matrix.crosscompile && steps.cache-cargo.outputs.cache-hit != 'true' }}
-        run: cargo install cross
-
-      - name: Build project with cross
-        if: ${{ matrix.crosscompile }}
-        run: cross build --release --locked --target ${{ matrix.target }}
-
-      - name: Create archive with the binary
-        run: tar caf ${{ env.archive }} --directory=target/${{ matrix.target }}/release ${{ env.binary }}
+      - name: Create archive
+        run: |
+          tar caf ${{ steps.vars.outputs.ARCHIVE }} --directory=${{ steps.vars.outputs.RELEASE }} ${{ steps.vars.outputs.BINARY }}
 
       - name: Upload binary to release
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.archive }}
-          asset_name: ${{ env.archive }}
+          file: ${{ steps.vars.outputs.ARCHIVE }}
+          asset_name: ${{ steps.vars.outputs.ARCHIVE }}
           tag: ${{ github.ref }}
