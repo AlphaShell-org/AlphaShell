@@ -29,7 +29,7 @@ external "PATH";
 echo(PATH); // environment variable
 
 // whitespaces aren't significant, just like in C-like languages
-if a > 10 { echo("a is arger than 10"); }
+if a > 10 { echo("a is larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
 

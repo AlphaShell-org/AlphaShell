@@ -7,7 +7,7 @@ let map = { foo: "bar", foo2: "baz" }; // associative array (dict)
 let d = a == "2" ? "a" : "b";
 
 /*
-  this is a block comment
+  block comment
 */
 
 a = "10";
@@ -25,9 +25,17 @@ echo($(a + b)); // interpret as arithmetic
 echo("a: ${a}"); // string interpolation
 echo('a: ${a}'); // raw string
 
+external "PATH";
+echo(PATH); // environment variable
+
+// whitespaces aren't significant, just like in C-like languages
 if a > 10 { echo("a is larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
+
+// export variable from the block scope
+if true { echo("True"); export xyx = "xyz"; }
+echo(xyx);
 
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }
@@ -37,7 +45,7 @@ for person in people { echo(person); }
 let x = 0;
 while x < 10 {
   echo(x);
-  $(x += 1);
+  $(x += 1); // without arithmetic, it'd do concatenation
 }
 
 fn hello(name, age, cwd) {
@@ -46,10 +54,12 @@ fn hello(name, age, cwd) {
 
 hello("John", 25, c) | lolcat(); // pipe function output
 let fb = "foobar" | sed("s/bar/baz/g"); // pipe value
-let ab = $(a - b) | wc("-l"); // pipe value
+let ab = $(a - b) | wc(-c); // pipe value
+let ab2 = $(a - b) | wc(--chars); // long flag works as well
 
 echo(fb);
 echo(ab);
+echo(ab2);
 
 fn arrayFunction() {
   for a in @ { // @ is args array
