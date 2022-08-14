@@ -51,7 +51,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
 
   loop {
     match ph.peek(0) {
-      Some(TT::Comma) => ph.advance(),
+      Some(TT::Comma) => {}
       Some(TT::Semicolon) => break,
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
@@ -64,11 +64,13 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
     };
+
+    ph.advance();
   }
 
   ph.advance();
 
-  if ph.peek(0) == Some(&TT::Import) {
+  if token.r#type == TT::Import {
     macro_rules! unwrap_or_error {
       ($input:expr, $file:ident) => {
         match $input {

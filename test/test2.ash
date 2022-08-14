@@ -1,4 +1,4 @@
-printf("loaded test2");
+printf("loaded test2\n");
 
 fn test2() {
   for i in 0..3 {
@@ -6,3 +6,4 @@ fn test2() {
   }
 }
 
+test2();

@@ -256,7 +256,7 @@ fn transpile_assignment(
 
     let right = transpile_inner(t, right, node)?;
 
-    Ok(format!("{left} {operator} {right}",))
+    Ok(format!("{left}{operator}{right}",))
   }
 }
 
