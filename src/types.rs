@@ -34,6 +34,8 @@ pub enum TokenType {
   RawString(String),
   Identifier(String),
 
+  Flag(String),
+
   // Keywords
   Export,
   Let,

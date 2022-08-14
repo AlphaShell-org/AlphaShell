@@ -199,6 +199,43 @@ fn load_name(state: &mut State) -> String {
   buf
 }
 
+fn load_flag(state: &mut State) -> Result<Token> {
+  let tmp_i = state.column;
+
+  let mut dash_count = 0;
+  let mut buf = String::new();
+
+  while state.valid_char() && state.char() == '-' {
+    buf.push(state.char());
+
+    state.advance();
+    dash_count += 1;
+  }
+
+  if dash_count > 2 {
+    return Err(Error::new("Invalid flag format", state));
+  }
+
+  if state.valid_char() && (is_alpha(state.char()) || matches!(state.char(), '_' | '-' | '.' | '='))
+  {
+    buf.push(state.char());
+    state.advance();
+  }
+
+  while state.valid_char() {
+    let char = state.char();
+
+    if !is_alpha_num(char) && !matches!(char, '_' | '-' | '.' | '=') {
+      break;
+    }
+
+    buf.push(state.char());
+    state.advance();
+  }
+
+  Ok(Token::new(TT::Flag(buf), Position(state.line, tmp_i)))
+}
+
 fn load_string(state: &mut State) -> Result<Token> {
   let mut buf = String::new();
 
@@ -394,7 +431,6 @@ fn tokenize_line(state: &mut State) -> Result<()> {
 
     // names
     if is_alpha(char) || char == '_' {
-      // for storing correct columns in tokens (+1 for zero indexing)
       let tmp_i = state.column;
 
       let str = load_name(state);
@@ -402,10 +438,22 @@ fn tokenize_line(state: &mut State) -> Result<()> {
       // check if string is a keyword
       let r#type = classify_str(&str);
 
-      state
-        .tokens
-        .push(Token::new(r#type, Position(state.line, tmp_i)));
+      let token = Token::new(r#type, Position(state.line, tmp_i));
+
+      state.tokens.push(token);
+
       continue;
+    }
+
+    // flags
+    if char == '-' {
+      if let Some(char) = state.next() {
+        if is_alpha(char) || char == '-' {
+          let token = load_flag(state)?;
+          state.tokens.push(token);
+          continue;
+        }
+      }
     }
 
     // numbers

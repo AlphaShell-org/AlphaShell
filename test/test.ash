@@ -46,10 +46,12 @@ fn hello(name, age, cwd) {
 
 hello("John", 25, c) | lolcat(); // pipe function output
 let fb = "foobar" | sed("s/bar/baz/g"); // pipe value
-let ab = $(a - b) | wc("-l"); // pipe value
+let ab = $(a - b) | wc(-c); // pipe value
+let ab2 = $(a - b) | wc(--chars); // long flag works as well
 
 echo(fb);
 echo(ab);
+echo(ab2);
 
 fn arrayFunction() {
   for a in @ { // @ is args array

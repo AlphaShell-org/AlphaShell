@@ -106,7 +106,12 @@ fn parse_args(ph: &mut ParseHelper) -> Result<Vec<Value>, Error> {
       break;
     }
 
-    let arg = value::parse_inner(ph)?;
+    let arg = if let Some(TT::Flag(str)) = ph.peek(0).cloned() {
+      ph.advance();
+      Value::Literal(Literal::RawString(str))
+    } else {
+      value::parse_inner(ph)?
+    };
 
     args.push(arg);
 
