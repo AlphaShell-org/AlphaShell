@@ -2,8 +2,11 @@
 name = "alpha-shell"
 version = "0.2.1"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "A transpiler for the AlphaShell language"
+homepage = "https://github.com/AlphaShell-org/AlphaShell"
+documentation = "https://github.com/AlphaShell-org/AlphaShell"
+repository = "https://github.com/AlphaShell-org/AlphaShell"
 
 [dependencies]
 regex = "1.6.0"
