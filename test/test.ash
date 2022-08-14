@@ -25,6 +25,9 @@ echo($(a + b)); // interpret as arithmetic
 echo("a: ${a}"); // string interpolation
 echo('a: ${a}'); // raw string
 
+external "PATH";
+echo(PATH); // environment variable
+
 // whitespaces aren't significant, just like in C-like languages
 if a > 10 { echo("a is arger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
