@@ -4,9 +4,9 @@ use super::{
   value,
 };
 use crate::parse::{
+  declaration::{Declaration, Type},
   node::Node,
   value::{Literal, Value},
-  var::{Declaration, DeclarationType},
 };
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
@@ -22,8 +22,8 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
       }
 
       let type_string = match r#type {
-        DeclarationType::Export => "export",
-        DeclarationType::Let => "local",
+        Type::Export => "export",
+        Type::Let => "local",
       };
 
       let value = value::transpile(t, value)?;

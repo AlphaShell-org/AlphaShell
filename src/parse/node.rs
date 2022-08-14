@@ -5,7 +5,7 @@ use super::{
   r#if::If,
   r#while::While,
   value::Value,
-  var::Declaration,
+  declaration::Declaration,
 };
 
 #[derive(Debug, PartialEq, Clone)]

@@ -18,7 +18,7 @@ pub mod import;
 pub mod map;
 pub mod r#return;
 pub mod value;
-pub mod var;
+pub mod declaration;
 pub mod r#while;
 
 #[allow(clippy::enum_glob_use)]
@@ -38,7 +38,7 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
         Ok(Node::Empty)
       }
       Function => r#function::parse(&mut ph),
-      Export | Let => var::parse(&mut ph),
+      Export | Let => declaration::parse(&mut ph),
       For => r#for::parse(&mut ph),
       While => r#while::parse(&mut ph),
       If => r#if::parse(&mut ph),

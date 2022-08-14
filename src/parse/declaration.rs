@@ -7,20 +7,20 @@ use super::{
 use crate::{check_token, types::TT};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum DeclarationType {
+pub enum Type {
   Let,
   Export,
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Declaration {
-  pub r#type: DeclarationType,
+  pub r#type: Type,
   pub name: String,
   pub value: Box<Node>,
 }
 
 impl Declaration {
-  pub fn new(r#type: DeclarationType, name: String, value: Box<Node>) -> Self {
+  pub fn new(r#type: Type, name: String, value: Box<Node>) -> Self {
     Self {
       r#type,
       name,
@@ -33,8 +33,8 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   check_token!(ph, TT::Let | TT::Export);
 
   let r#type = match ph.peek(0) {
-    Some(TT::Let) => DeclarationType::Let,
-    Some(TT::Export) => DeclarationType::Export,
+    Some(TT::Let) => Type::Let,
+    Some(TT::Export) => Type::Export,
     Some(_) => return Err(Error::unexpected(ph)),
     None => return Err(Error::end(ph)),
   };
@@ -46,6 +46,12 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     Some(_) => return Err(Error::unexpected(ph)),
     None => return Err(Error::end(ph)),
   };
+
+  if ph.variables.get(&name).is_some() {
+    return Err(Error::duplicate_variable(ph));
+  }
+
+  ph.variables.insert(name.clone());
 
   ph.advance();
 
