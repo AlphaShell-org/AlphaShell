@@ -9,7 +9,9 @@ use parse_helper::ParseHelper;
 
 pub mod array;
 pub mod block;
+pub mod declaration;
 pub mod expression;
+pub mod external;
 pub mod r#for;
 pub mod function;
 pub mod function_call;
@@ -18,7 +20,6 @@ pub mod import;
 pub mod map;
 pub mod r#return;
 pub mod value;
-pub mod declaration;
 pub mod r#while;
 
 #[allow(clippy::enum_glob_use)]
@@ -45,6 +46,7 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
       Return => r#return::parse(&mut ph),
       Continue => Ok(Node::Continue),
       Break => Ok(Node::Break),
+      External => external::parse(&mut ph),
 
       Identifier(..) | Dollar => {
         if let Some(next) = ph.peek(1) {

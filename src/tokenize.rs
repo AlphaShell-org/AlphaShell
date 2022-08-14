@@ -19,6 +19,7 @@ static KEYWORDS: phf::Map<&'static str, TokenType> = phf::phf_map! {
   "while" => TT::While,
   "continue" => TT::Continue,
   "break" => TT::Break,
+  "external" => TT::External,
 };
 
 pub struct State<'a> {

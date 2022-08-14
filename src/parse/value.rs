@@ -114,6 +114,10 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
     }
 
     Some(TT::Identifier(name)) => {
+      if ph.variables.get(name).is_none() {
+        return Err(Error::undefined_variable(ph));
+      }
+
       let name = name.clone();
       ph.advance();
       Ok(Value::Identifier(name))

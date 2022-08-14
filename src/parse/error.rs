@@ -32,6 +32,30 @@ impl Error {
     Self::new(&format!("Unexpected token {token}"), Some(token))
   }
 
+  pub fn duplicate_variable(ph: &ParseHelper) -> Self {
+    let token = ph.get(0).unwrap();
+
+    #[cfg(debug_assertions)]
+    println!(
+      "{}\ncurrent index: {}",
+      ph.pretty_print_tokens(),
+      ph.get_index()
+    );
+    Self::new(&format!("Duplicate variable {token}"), Some(token))
+  }
+
+  pub fn undefined_variable(ph: &ParseHelper) -> Self {
+    let token = ph.get(0).unwrap();
+
+    #[cfg(debug_assertions)]
+    println!(
+      "{}\ncurrent index: {}",
+      ph.pretty_print_tokens(),
+      ph.get_index()
+    );
+    Self::new(&format!("Undefined variable {token}"), Some(token))
+  }
+
   pub fn end(ph: &ParseHelper) -> Error {
     #[cfg(debug_assertions)]
     println!(

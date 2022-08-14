@@ -1,14 +1,21 @@
+use std::collections::HashSet;
+
 use crate::types::{Token, TokenType};
 
 #[derive(Debug)]
 pub struct ParseHelper {
   tokens: Vec<Token>,
   index: usize,
+  pub variables: HashSet<String>,
 }
 
 impl ParseHelper {
   pub fn new(tokens: Vec<Token>) -> ParseHelper {
-    ParseHelper { tokens, index: 0 }
+    ParseHelper {
+      tokens,
+      index: 0,
+      variables: HashSet::new(),
+    }
   }
 
   pub fn get(&self, offset: i32) -> Option<&Token> {

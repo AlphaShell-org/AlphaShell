@@ -37,6 +37,7 @@ pub enum TokenType {
   // Keywords
   Export,
   Let,
+  External,
   Import,
   Source,
   Function,
