@@ -15,6 +15,7 @@ use crate::{
 pub enum Literal {
   Int(i32),
   Float(f32),
+  Bool(bool),
   String(String),
   RawString(String),
   Array(Vec<Value>),
@@ -142,6 +143,11 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
       let num = *num;
       ph.advance();
       Ok(Value::Literal(Literal::Float(num)))
+    }
+    Some(TT::Boolean(boolean)) => {
+      let boolean = *boolean;
+      ph.advance();
+      Ok(Value::Literal(Literal::Bool(boolean)))
     }
 
     Some(TT::LBracket) => Ok(Value::Literal(Literal::Array(array::parse(ph)?))),

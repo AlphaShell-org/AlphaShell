@@ -28,6 +28,7 @@ pub type TT = TokenType;
 pub enum TokenType {
   Integer(i32),
   Float(f32),
+  Boolean(bool),
 
   String(String),
   RawString(String),

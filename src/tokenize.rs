@@ -333,7 +333,11 @@ fn classify_str(str: &str) -> TokenType {
   if let Some(r#type) = KEYWORDS.get(str) {
     r#type.clone()
   } else {
-    TT::Identifier(str.to_string())
+    match str {
+      "true" => TT::Boolean(true),
+      "false" => TT::Boolean(false),
+      _ => TT::Identifier(str.to_string()),
+    }
   }
 }
 
