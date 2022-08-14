@@ -25,9 +25,14 @@ echo($(a + b)); // interpret as arithmetic
 echo("a: ${a}"); // string interpolation
 echo('a: ${a}'); // raw string
 
+// whitespaces aren't significant, just like in C-like languages
 if a > 10 { echo("a is arger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
+
+// export variable from the block scope
+if true { echo("True"); export xyx = "xyz"; }
+echo(xyx);
 
 for a in 0..5 { echo(a); } // start..end[..step]
 for a in 0..10..2 { echo(a); }

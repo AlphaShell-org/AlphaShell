@@ -7,6 +7,7 @@ pub struct ParseHelper {
   tokens: Vec<Token>,
   index: usize,
   pub variables: HashSet<String>,
+  pub exports: HashSet<String>,
 }
 
 impl ParseHelper {
@@ -15,6 +16,7 @@ impl ParseHelper {
       tokens,
       index: 0,
       variables,
+      exports: HashSet::new(),
     }
   }
 

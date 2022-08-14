@@ -33,10 +33,13 @@ use crate::types::{
 };
 
 pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
-  inner(tokens, HashSet::new())
+  inner(tokens, HashSet::new()).map(|(nodes, _)| nodes)
 }
 
-pub fn inner(tokens: &[Token], variables: HashSet<String>) -> ParserResult<Vec<Node>> {
+pub fn inner(
+  tokens: &[Token],
+  variables: HashSet<String>,
+) -> ParserResult<(Vec<Node>, HashSet<String>)> {
   let mut ph = ParseHelper::new(tokens.to_vec(), variables);
 
   let mut tree = vec![];
@@ -78,5 +81,5 @@ pub fn inner(tokens: &[Token], variables: HashSet<String>) -> ParserResult<Vec<N
     }
   }
 
-  Ok(tree)
+  Ok((tree, ph.exports))
 }

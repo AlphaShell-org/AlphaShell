@@ -25,7 +25,10 @@ pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserRe
     }
 
     if braces_level == 0 {
-      let body = super::inner(&tmp, variables)?;
+      let (body, exports) = super::inner(&tmp, variables)?;
+
+      ph.variables.extend(exports.iter().cloned());
+      ph.exports.extend(exports.iter().cloned());
 
       ph.advance();
 

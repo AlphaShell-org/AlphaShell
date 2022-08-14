@@ -52,6 +52,9 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   }
 
   ph.variables.insert(name.clone());
+  if r#type == Type::Export {
+    ph.exports.insert(name.clone());
+  }
 
   ph.advance();
 
