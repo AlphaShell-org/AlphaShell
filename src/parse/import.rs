@@ -35,7 +35,6 @@ fn read_file(path: &Path, token: &Token) -> Result<String, Error> {
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
   check_token!(ph, TT::Import | TT::Source);
 
-  let static_import = ph.peek(0) == Some(&TT::Import);
   let token = ph.get(0).cloned().unwrap();
 
   ph.advance();
@@ -62,27 +61,34 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
 
   ph.advance();
 
-  if static_import {
-    let mut imported = vec![];
-    for file in files {
-      let contents = read_file(Path::new(&file), &token)?;
-
-      let tokens = match crate::tokenize(&contents) {
-        Ok(tokens) => tokens,
-        Err(e) => return Err(Error::new(&e.msg, None)),
+  if ph.peek(0) == Some(&TT::Import) {
+    macro_rules! unwrap_or_error {
+      ($input:expr, $file:ident) => {
+        match $input {
+          Ok(a) => a,
+          Err(e) => {
+            return Err(Error::new(
+              &format!("Error while importing {}:\n{e}", $file),
+              Some(&token),
+            ))
+          }
+        }
       };
-
-      let tree = match crate::parse(&tokens) {
-        Ok(tree) => tree,
-        Err(e) => return Err(e),
-      };
-
-      imported.extend_from_slice(&tree);
     }
 
-    Ok(imported)
+    files
+      .into_iter()
+      .map(|file| {
+        let contents = read_file(Path::new(&file), &token)?;
+
+        let tokens = unwrap_or_error!(crate::tokenize(&contents), file);
+        let tree = unwrap_or_error!(crate::parse(&tokens), file);
+
+        Ok(tree)
+      })
+      .collect::<ParserResult<Vec<Vec<Node>>>>()
+      .map(|trees| trees.into_iter().flatten().collect())
   } else {
-    let import = files.into_iter().map(Node::Source).collect();
-    Ok(import)
+    Ok(files.into_iter().map(Node::Source).collect())
   }
 }
