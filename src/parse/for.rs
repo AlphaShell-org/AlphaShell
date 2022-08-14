@@ -80,7 +80,10 @@ fn parse_for(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
     1
   };
 
-  let block = Box::new(block::parse(ph)?);
+  let mut variables = ph.variables.clone();
+  variables.insert(variable.clone());
+
+  let block = Box::new(block::parse(ph, variables)?);
 
   let node = Node::For(For::new(start, end, step, variable, block));
 
@@ -90,7 +93,10 @@ fn parse_for(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
 fn parse_foreach(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
   let iterable = value::parse_inner(ph)?;
 
-  let block = block::parse_inner(ph)?;
+  let mut variables = ph.variables.clone();
+  variables.insert(variable.clone());
+
+  let block = block::parse_inner(ph, variables)?;
 
   let node = Node::Foreach(Foreach::new(iterable, variable, block));
 

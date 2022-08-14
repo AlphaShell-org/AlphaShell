@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::{
   error::{Error, ParserResult},
   node::Node,
@@ -7,7 +9,7 @@ use crate::{check_token, types::TT};
 
 pub type Block = Vec<Node>;
 
-pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Block> {
+pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserResult<Block> {
   check_token!(ph, TT::LBrace);
 
   ph.advance();
@@ -23,7 +25,7 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Block> {
     }
 
     if braces_level == 0 {
-      let body = super::parse(&tmp)?;
+      let body = super::inner(&tmp, variables)?;
 
       ph.advance();
 
@@ -37,8 +39,8 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Block> {
   Err(Error::end(ph))
 }
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
-  let body = parse_inner(ph)?;
+pub fn parse(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserResult<Node> {
+  let body = parse_inner(ph, variables)?;
   let block = Node::Block(body);
   Ok(block)
 }

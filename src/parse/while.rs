@@ -30,7 +30,7 @@ fn parse_inner(ph: &mut ParseHelper) -> ParserResult<While> {
 
   let condition = value::parse_inner(ph)?;
 
-  let block = block::parse_inner(ph)?;
+  let block = block::parse_inner(ph, ph.variables.clone())?;
 
   let r#while = While::new(condition, block);
 

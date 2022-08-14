@@ -10,11 +10,11 @@ pub struct ParseHelper {
 }
 
 impl ParseHelper {
-  pub fn new(tokens: Vec<Token>) -> ParseHelper {
+  pub fn new(tokens: Vec<Token>, variables: HashSet<String>) -> ParseHelper {
     ParseHelper {
       tokens,
       index: 0,
-      variables: HashSet::new(),
+      variables,
     }
   }
 

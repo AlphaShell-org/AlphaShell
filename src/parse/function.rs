@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::{
   block,
   error::{Error, ParserResult},
@@ -62,7 +64,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let block = block::parse(ph)?;
+  let block = block::parse(ph, params.iter().cloned().collect::<HashSet<_>>())?;
   let node = Node::Function(Function::new(name, params, Box::new(block)));
 
   Ok(node)

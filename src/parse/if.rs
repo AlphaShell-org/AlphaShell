@@ -36,7 +36,7 @@ impl If {
 fn parse_inner(ph: &mut ParseHelper) -> ParserResult<If> {
   let condition = value::parse_inner(ph)?;
 
-  let block = block::parse_inner(ph)?;
+  let block = block::parse_inner(ph, ph.variables.clone())?;
 
   let r#else = match ph.peek(0) {
     Some(TT::Elif) => {
@@ -46,7 +46,7 @@ fn parse_inner(ph: &mut ParseHelper) -> ParserResult<If> {
 
     Some(TT::Else) => {
       ph.advance();
-      Some(Else::Else(block::parse_inner(ph)?))
+      Some(Else::Else(block::parse_inner(ph, ph.variables.clone())?))
     }
 
     _ => None,

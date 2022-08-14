@@ -3,6 +3,8 @@ pub mod node;
 mod parse_helper;
 mod utils;
 
+use std::collections::HashSet;
+
 use error::{Error, ParserResult};
 use node::Node;
 use parse_helper::ParseHelper;
@@ -22,11 +24,20 @@ pub mod r#return;
 pub mod value;
 pub mod r#while;
 
-#[allow(clippy::enum_glob_use)]
-use crate::types::{Token, TokenType::*};
+use crate::types::{
+  Token,
+  TokenType::{
+    Break, Continue, Dollar, Export, External, For, Function, Identifier, If, Import, LParen, Let,
+    Return, Source, While,
+  },
+};
 
 pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
-  let mut ph = ParseHelper::new(tokens.to_vec());
+  inner(tokens, HashSet::new())
+}
+
+pub fn inner(tokens: &[Token], variables: HashSet<String>) -> ParserResult<Vec<Node>> {
+  let mut ph = ParseHelper::new(tokens.to_vec(), variables);
 
   let mut tree = vec![];
 
