@@ -37,7 +37,7 @@ for person in people { echo(person); }
 let x = 0;
 while x < 10 {
   echo(x);
-  $(x += 1);
+  $(x += 1); // without arithmetic, it'd do concatenation
 }
 
 fn hello(name, age, cwd) {
