@@ -7,7 +7,7 @@ use super::{
 };
 use crate::parse::{
   node::Node,
-  value::{BinaryOperator, Literal, UnaryOperator, Value},
+  value::{AssignmentOperator, BinaryOperator, Literal, UnaryOperator, Value},
 };
 
 fn transpile_identifier(t: &mut Transpiler, name: &String) -> String {
@@ -113,15 +113,7 @@ fn transpile_binary_expression(
       BinaryOperator::Multiply => "*",
       BinaryOperator::Divide => "/",
       BinaryOperator::Modulo => "%",
-
-      BinaryOperator::Assignment => "=",
-      BinaryOperator::AddAssignment => "+=",
-      BinaryOperator::SubAssignment => "-=",
-      BinaryOperator::MultiplyAssignment => "*=",
-      BinaryOperator::DivideAssignment => "/=",
-      BinaryOperator::ModuloAssignment => "%=",
-      BinaryOperator::PowerAssignment => "**=",
-      op => todo!("{op:?}"),
+      op => unimplemented!("{op:?}"),
     };
 
     Ok(format!(
@@ -131,11 +123,6 @@ fn transpile_binary_expression(
     ))
   } else if t.search(&BlockType::Condition) {
     let operator = match operator {
-      BinaryOperator::Add => "+",
-      BinaryOperator::Sub => "-",
-      BinaryOperator::Multiply => "*",
-      BinaryOperator::Divide => "/",
-      BinaryOperator::Modulo => "%",
       BinaryOperator::Equal => "==",
       BinaryOperator::NotEqual => "!=",
       BinaryOperator::Greater => "-gt",
@@ -145,8 +132,7 @@ fn transpile_binary_expression(
       BinaryOperator::RegexMatch => "=~",
       BinaryOperator::And => "&&",
       BinaryOperator::Or => "||",
-
-      op => return Err(Error::new(&format!("Unexpected operator: {op:?}"), node)),
+      op => unimplemented!("{op:?}"),
     };
 
     Ok(format!(
@@ -154,18 +140,6 @@ fn transpile_binary_expression(
       transpile_inner(t, left, node)?,
       transpile_inner(t, right, node)?
     ))
-  } else if operator == &BinaryOperator::Assignment {
-    if matches!(left, Value::Identifier(..) | Value::MemberExpression(..)) {
-      t.push_block(BlockType::Identifier);
-      let identifier = transpile_inner(t, left, node)?;
-      t.pop_block();
-
-      let value = transpile_inner(t, right, node)?;
-
-      Ok(format!("{identifier}={value}"))
-    } else {
-      Err(Error::new("Cannot assign to this expression", node))
-    }
   } else {
     // string mode
     match operator {
@@ -236,6 +210,56 @@ fn transpile_member_expression(
   }
 }
 
+fn transpile_assignment(
+  t: &mut Transpiler,
+  left: &Value,
+  operator: &AssignmentOperator,
+  right: &Value,
+  node: &Node,
+) -> TranspileResult<String> {
+  if !matches!(left, Value::Identifier(..) | Value::MemberExpression(..)) {
+    return Err(Error::new("Cannot assign to this expression", node));
+  }
+
+  if matches!(t.get_block(), Some(BlockType::Arithmetics)) {
+    let operator = match operator {
+      AssignmentOperator::Assignment => "=",
+      AssignmentOperator::AddAssignment => "+=",
+      AssignmentOperator::SubAssignment => "-=",
+      AssignmentOperator::MultiplyAssignment => "*=",
+      AssignmentOperator::DivideAssignment => "/=",
+      AssignmentOperator::ModuloAssignment => "%=",
+      AssignmentOperator::PowerAssignment => "**=",
+    };
+
+    Ok(format!(
+      "{} {operator} {}",
+      transpile_inner(t, left, node)?,
+      transpile_inner(t, right, node)?
+    ))
+  } else {
+    // string mode
+    let operator = match operator {
+      AssignmentOperator::AddAssignment => "+=",
+      AssignmentOperator::Assignment => "=",
+      _ => {
+        return Err(Error::new(
+          &format!("Operator not supported in string mode: {operator:?}"),
+          node,
+        ))
+      }
+    };
+
+    t.push_block(BlockType::Identifier);
+    let left = transpile_inner(t, left, node)?;
+    t.pop_block();
+
+    let right = transpile_inner(t, right, node)?;
+
+    Ok(format!("{left} {operator} {right}",))
+  }
+}
+
 pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> TranspileResult<String> {
   let indent = !matches!(
     t.get_block(),
@@ -263,6 +287,9 @@ pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> Transp
       transpile_ternary_expression(t, condition, left, right, node)
     }
     Value::MemberExpression(left, right) => transpile_member_expression(t, left, right, node),
+    Value::Assignment(left, operator, right) => {
+      transpile_assignment(t, left, operator, right, node)
+    }
     Value::FunctionCall(function_call) => function_call::transpile_inner(t, function_call, node),
   };
 

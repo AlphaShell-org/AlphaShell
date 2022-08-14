@@ -44,7 +44,32 @@ pub enum BinaryOperator {
   RegexMatch,
   And,
   Or,
+}
 
+impl BinaryOperator {
+  pub fn try_from_token(token: &TokenType) -> Option<Self> {
+    match token {
+      TT::Add => Some(Self::Add),
+      TT::Sub => Some(Self::Sub),
+      TT::Multiply => Some(Self::Multiply),
+      TT::Divide => Some(Self::Divide),
+      TT::Modulo => Some(Self::Modulo),
+      TT::Equal => Some(Self::Equal),
+      TT::NotEqual => Some(Self::NotEqual),
+      TT::Greater => Some(Self::Greater),
+      TT::GreaterEqual => Some(Self::GreaterEqual),
+      TT::Less => Some(Self::Less),
+      TT::LessEqual => Some(Self::LessEqual),
+      TT::RegexMatch => Some(Self::RegexMatch),
+      TT::And => Some(Self::And),
+      TT::Or => Some(Self::Or),
+      _ => None,
+    }
+  }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum AssignmentOperator {
   Assignment,
   AddAssignment,
   SubAssignment,
@@ -53,31 +78,16 @@ pub enum BinaryOperator {
   ModuloAssignment,
   PowerAssignment,
 }
-
-impl BinaryOperator {
+impl AssignmentOperator {
   pub fn try_from_token(token: &TokenType) -> Option<Self> {
     match token {
-      TT::Add => Some(BinaryOperator::Add),
-      TT::Sub => Some(BinaryOperator::Sub),
-      TT::Multiply => Some(BinaryOperator::Multiply),
-      TT::Divide => Some(BinaryOperator::Divide),
-      TT::Modulo => Some(BinaryOperator::Modulo),
-      TT::Equal => Some(BinaryOperator::Equal),
-      TT::NotEqual => Some(BinaryOperator::NotEqual),
-      TT::Greater => Some(BinaryOperator::Greater),
-      TT::GreaterEqual => Some(BinaryOperator::GreaterEqual),
-      TT::Less => Some(BinaryOperator::Less),
-      TT::LessEqual => Some(BinaryOperator::LessEqual),
-      TT::RegexMatch => Some(BinaryOperator::RegexMatch),
-      TT::And => Some(BinaryOperator::And),
-      TT::Or => Some(BinaryOperator::Or),
-      TT::Assignment => Some(BinaryOperator::Assignment),
-      TT::AddAssignment => Some(BinaryOperator::AddAssignment),
-      TT::SubAssignment => Some(BinaryOperator::SubAssignment),
-      TT::MultiplyAssignment => Some(BinaryOperator::MultiplyAssignment),
-      TT::DivideAssignment => Some(BinaryOperator::DivideAssignment),
-      TT::ModuloAssignment => Some(BinaryOperator::ModuloAssignment),
-      TT::PowerAssignment => Some(BinaryOperator::PowerAssignment),
+      TT::Assignment => Some(Self::Assignment),
+      TT::AddAssignment => Some(Self::AddAssignment),
+      TT::SubAssignment => Some(Self::SubAssignment),
+      TT::MultiplyAssignment => Some(Self::MultiplyAssignment),
+      TT::DivideAssignment => Some(Self::DivideAssignment),
+      TT::ModuloAssignment => Some(Self::ModuloAssignment),
+      TT::PowerAssignment => Some(Self::PowerAssignment),
 
       _ => None,
     }
@@ -92,6 +102,7 @@ pub enum Value {
   BinaryExpression(Box<Value>, BinaryOperator, Box<Value>),
   TernaryExpression(Box<Value>, Box<Value>, Box<Value>),
   MemberExpression(Box<Value>, Box<Value>),
+  Assignment(Box<Value>, AssignmentOperator, Box<Value>),
   FunctionCall(FunctionCall),
 }
 
@@ -202,6 +213,15 @@ fn parse_stage_1(ph: &mut ParseHelper) -> ParserResult<Value> {
       ph.advance();
       let right = parse_single(ph)?;
       left = Value::BinaryExpression(Box::new(left), operator, Box::new(right));
+    } else if let Some(operator) = AssignmentOperator::try_from_token(token) {
+      match &left {
+        Value::Identifier(_) | Value::MemberExpression(_, _) => {}
+        _ => return Err(Error::new("Can't assign to this expression", ph.get(-1))),
+      }
+
+      ph.advance();
+      let right = parse_single(ph)?;
+      left = Value::Assignment(Box::new(left), operator, Box::new(right));
     } else {
       return Ok(left);
     }
