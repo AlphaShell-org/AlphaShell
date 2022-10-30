@@ -55,7 +55,7 @@ jobs:
             *)              BINARY="ash" ;;
           esac;
 
-          echo "BINARY=${BINARY} >> $GITHUB_OUTPUT"
+          echo "BINARY=${BINARY}"
           echo "BINARY=${BINARY}" >> $GITHUB_OUTPUT
 
 
@@ -64,7 +64,7 @@ jobs:
             *)        CROSS="true" ;;
           esac;
 
-          echo "CROSS=${CROSS} >> $GITHUB_OUTPUT"
+          echo "CROSS=${CROSS}"
           echo "CROSS=${CROSS}" >> $GITHUB_OUTPUT
 
 
@@ -73,13 +73,13 @@ jobs:
             *)         ARCHIVE="ash_$TARGET.zip" ;;
           esac;
 
-          echo "ARCHIVE=${ARCHIVE} >> $GITHUB_OUTPUT"
+          echo "ARCHIVE=${ARCHIVE}"
           echo "ARCHIVE=${ARCHIVE}" >> $GITHUB_OUTPUT
 
 
           RELEASE="target/${{ matrix.job.target }}/release"
 
-          echo "RELEASE=${RELEASE} >> $GITHUB_OUTPUT"
+          echo "RELEASE=${RELEASE}"
           echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
 
 
@@ -89,7 +89,7 @@ jobs:
             *)                 STRIP="strip"
           esac;
 
-          echo "STRIP=${STRIP} >> $GITHUB_OUTPUT"
+          echo "STRIP=${STRIP}"
           echo "STRIP=${STRIP}" >> $GITHUB_OUTPUT
 
       - name: Install toolchain
