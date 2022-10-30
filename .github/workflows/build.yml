@@ -26,10 +26,10 @@ jobs:
           - target: x86_64-apple-darwin
             os: macos-latest
 
-          - target: x86_64-pc-windows-msvc
+          - target: i686-pc-windows-msvc
             os: windows-latest
 
-          - target: i686-pc-windows-msvc
+          - target: x86_64-pc-windows-msvc
             os: windows-latest
 
     runs-on: ${{ matrix.job.os }}
@@ -55,8 +55,8 @@ jobs:
             *)              BINARY="ash" ;;
           esac;
 
-          echo set-output name=BINARY::${BINARY}
-          echo ::set-output name=BINARY::${BINARY}
+          echo "BINARY=${BINARY} >> $GITHUB_OUTPUT"
+          echo "BINARY=${BINARY}" >> $GITHUB_OUTPUT
 
 
           case $TARGET in
@@ -64,8 +64,8 @@ jobs:
             *)        CROSS="true" ;;
           esac;
 
-          echo set-output name=CROSS::${CROSS}
-          echo ::set-output name=CROSS::${CROSS}
+          echo "CROSS=${CROSS} >> $GITHUB_OUTPUT"
+          echo "CROSS=${CROSS}" >> $GITHUB_OUTPUT
 
 
           case $TARGET in
@@ -73,14 +73,14 @@ jobs:
             *)         ARCHIVE="ash_$TARGET.zip" ;;
           esac;
 
-          echo set-output name=ARCHIVE::${ARCHIVE}
-          echo ::set-output name=ARCHIVE::${ARCHIVE}
+          echo "ARCHIVE=${ARCHIVE} >> $GITHUB_OUTPUT"
+          echo "ARCHIVE=${ARCHIVE}" >> $GITHUB_OUTPUT
 
 
           RELEASE="target/${{ matrix.job.target }}/release"
 
-          echo set-output name=RELEASE::${RELEASE}
-          echo ::set-output name=RELEASE::${RELEASE}
+          echo "RELEASE=${RELEASE} >> $GITHUB_OUTPUT"
+          echo "RELEASE=${RELEASE}" >> $GITHUB_OUTPUT
 
 
           case ${{ matrix.job.target }} in
@@ -89,8 +89,8 @@ jobs:
             *)                 STRIP="strip"
           esac;
 
-          echo set-output name=STRIP::${STRIP}
-          echo ::set-output name=STRIP::${STRIP}
+          echo "STRIP=${STRIP} >> $GITHUB_OUTPUT"
+          echo "STRIP=${STRIP}" >> $GITHUB_OUTPUT
 
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
