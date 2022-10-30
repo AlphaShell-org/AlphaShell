@@ -28,6 +28,13 @@ echo('a: ${a}'); // raw string
 external "PATH";
 echo(PATH); // environment variable
 
+// $n == n-th argument
+// 0 is name, 1..9 are regular arguments
+// works both for script args and function args
+echo($0);
+// @ is arguments array (excluding $0)
+echo(@);
+
 // whitespaces aren't significant, just like in C-like languages
 if a > 10 { echo("a is larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
@@ -62,7 +69,7 @@ echo(ab);
 echo(ab2);
 
 fn arrayFunction() {
-  for a in @ { // @ is args array
+  for a in @ {
     echo(a);
   }
 

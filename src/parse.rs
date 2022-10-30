@@ -33,7 +33,9 @@ use crate::types::{
 };
 
 pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
-  inner(tokens, HashSet::new()).map(|(nodes, _)| nodes)
+  let variables = (0..10).map(|x| x.to_string()).collect();
+
+  inner(tokens, variables).map(|(nodes, _)| nodes)
 }
 
 pub fn inner(

@@ -445,6 +445,23 @@ fn tokenize_line(state: &mut State) -> Result<()> {
       continue;
     }
 
+    if char == '$'
+      && matches!(
+        state.next(),
+        Some('0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9')
+      )
+    {
+      let token = Token::new(
+        TokenType::Identifier(state.next().unwrap().to_string()),
+        Position(state.line, state.column),
+      );
+
+      state.tokens.push(token);
+      state.advance_by(2);
+
+      continue;
+    }
+
     // flags
     if char == '-' {
       if let Some(char) = state.next() {
