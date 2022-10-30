@@ -132,6 +132,16 @@ impl Default for TokenType {
 
 impl std::fmt::Display for TokenType {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    write!(f, "{self:?}",)
+    match self {
+      TokenType::Integer(x) => write!(f, "{x}"),
+      TokenType::Float(x) => write!(f, "{x}"),
+      TokenType::Boolean(x) => write!(f, "{x}"),
+      TokenType::String(x)
+      | TokenType::RawString(x)
+      | TokenType::Identifier(x)
+      | TokenType::Flag(x) => write!(f, "{x}"),
+
+      _ => write!(f, "{self:?}"),
+    }
   }
 }
