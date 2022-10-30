@@ -1,5 +1,7 @@
-let a = "5";
-export b = 3 + 2 + 1; // throws warning - it does string concatenation
+// TODO: add named args
+
+let a = "5"; // local variable
+export b = "6"; // global variable
 let person = "John";
 let c = pwd();
 let people = ["John", "Peter"]; // array
@@ -10,7 +12,7 @@ let d = a == "2" ? "a" : "b";
   block comment
 */
 
-a = "10";
+a = "10"; // throws warning - it does string concatenation
 
 echo(a, b, c, d);
 
@@ -25,8 +27,10 @@ echo($(a + b)); // interpret as arithmetic
 echo("a: ${a}"); // string interpolation
 echo('a: ${a}'); // raw string
 
+// tell the interpreter that a variable from
+// outside of the current code exists
 external "PATH";
-echo(PATH); // environment variable
+echo(PATH);
 
 // $n == n-th argument
 // 0 is name, 1..9 are regular arguments
@@ -35,7 +39,7 @@ echo($0);
 // @ is arguments array (excluding $0)
 echo(@);
 
-// whitespaces aren't significant, just like in C-like languages
+// newlines aren't significant, like in C-like languages
 if a > 10 { echo("a is larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
@@ -49,20 +53,22 @@ for a in 0..10..2 { echo(a); }
 for word in ["hello", "world"] { echo(word); }
 for person in people { echo(person); }
 
-let x = 0;
+let x = "0";
 while x < 10 {
   echo(x);
   $(x += 1); // without arithmetic, it'd do concatenation
 }
 
 fn hello(name, age, cwd) {
+  // same thing, the names are just aliases
   echo("Hello ${name} aged ${age}, we're in ${cwd}");
+  echo("Hello ${1} aged ${2}, we're in ${3}");
 }
 
-hello("John", 25, c) | lolcat(); // pipe function output
+hello("John", "25", c) | lolcat(); // pipe function output
 let fb = "foobar" | sed("s/bar/baz/g"); // pipe value
-let ab = $(a - b) | wc(-c); // pipe value
-let ab2 = $(a - b) | wc(--chars); // long flag works as well
+let ab = $(a - b) | wc(-c); // flags get interpreted even without string
+let ab2 = $(a - b) | wc(--chars); // long flags works as well
 
 echo(fb);
 echo(ab);
@@ -73,6 +79,9 @@ fn arrayFunction() {
     echo(a);
   }
 
+  // return values work same as in zsh
+  // 0 == success
+  // 1..256 == error
   return 0;
 }
 
