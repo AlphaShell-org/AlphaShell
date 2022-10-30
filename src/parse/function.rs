@@ -40,7 +40,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let mut params = vec!["__name__".to_owned()]; // $0 is the name of the function
+  let mut params = vec![];
 
   loop {
     match ph.peek(0) {
