@@ -50,13 +50,13 @@ pub fn transpile_inner(
   let basic_call = if args.is_empty() {
     name.clone()
   } else {
-    let mut transpiled_args = vec![];
-    for arg in args {
-      transpiled_args.push(value::transpile_inner(t, arg, node)?);
-    }
-    let args = transpiled_args.join(" ");
+    let transpiled_args = args
+      .iter()
+      .map(|arg| value::transpile_inner(t, arg, node))
+      .collect::<TranspileResult<Vec<_>>>()?
+      .join(" ");
 
-    format!("{name} {args}")
+    format!("{name} {transpiled_args}")
   };
 
   let call = if let Some(next) = next {
