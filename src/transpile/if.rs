@@ -3,12 +3,14 @@ use std::fmt::Write;
 use super::{
   block,
   error::{Error, TranspileResult},
+  function_call,
   transpiler::{BlockType, Transpiler},
+  utils::random_string,
   value,
 };
 use crate::parse::{
   node::Node,
-  r#if::{Else, If},
+  r#if::{Else, If, IfLet},
 };
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
@@ -60,6 +62,68 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
         write!(output, "{string_else}").unwrap();
       }
       write!(output, "{end}").unwrap();
+
+      Ok(output)
+    }
+    _ => Err(Error::new("Invalid node type", node)),
+  }
+}
+
+pub fn transpile_let(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
+  match node {
+    Node::IfLet(IfLet {
+      name,
+      call,
+      block,
+      r#else,
+    }) => {
+      t.push_block(BlockType::FunctionCall);
+      let call = function_call::transpile_inner(t, call, node)?;
+      t.pop_block();
+
+      let temp_name = format!("__tmp_{}", random_string(6));
+
+      t.push_block(BlockType::Generic);
+
+      let output = if let Some(else_block) = r#else {
+        format!(
+          "
+{temp_name}(){{
+  local {name}
+  {name}=$({call})
+  if [ $? = 0 ]; then
+{}
+  else
+{}
+  fi
+}}
+{temp_name}",
+          block::transpile_inner(t, block)?,
+          block::transpile_inner(t, else_block)?
+        )
+      } else {
+        format!(
+          "
+{temp_name}(){{
+  local {name}
+  {name}=$({call})
+  if [ $? = 0 ]; then
+{}
+  fi
+}}
+{temp_name}",
+          block::transpile_inner(t, block)?
+        )
+      };
+
+      t.pop_block();
+
+      let output = output
+        .trim()
+        .lines()
+        .map(|line| t.use_indent(line))
+        .collect::<Vec<_>>()
+        .join("\n");
 
       Ok(output)
     }

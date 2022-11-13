@@ -7,7 +7,7 @@ use error::TranspileResult;
 use self::transpiler::Transpiler;
 use crate::parse::node::Node::{
   self, Block, Break, Continue, Declaration, Empty, Expression, For, Foreach, Function,
-  FunctionCall, If, Return, Source, Value, While,
+  FunctionCall, If, IfLet, Return, Source, Value, While, WhileLet,
 };
 
 mod block;
@@ -21,6 +21,8 @@ mod r#if;
 mod source;
 mod value;
 mod r#while;
+
+mod utils;
 
 pub fn transpile(tree: &[Node]) -> TranspileResult<String> {
   let mut t = Transpiler::new("  ");
@@ -41,9 +43,11 @@ pub fn inner(tree: &[Node], t: &mut Transpiler) -> TranspileResult<String> {
       Function(_) => function::transpile(t, node),
       FunctionCall(_) => function_call::transpile(t, node),
       If(_) => r#if::transpile(t, node),
+      IfLet(_) => r#if::transpile_let(t, node),
       Source(_) => source::transpile(t, node),
       Value(_) => value::transpile(t, node),
       While(_) => r#while::transpile(t, node),
+      WhileLet(_) => r#while::transpile_let(t, node),
 
       Break => Ok(t.use_indent("break")),
       Continue => Ok(t.use_indent("continue")),

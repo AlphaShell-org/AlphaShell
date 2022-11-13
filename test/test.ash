@@ -59,6 +59,21 @@ while x < 10 {
   $(x += 1); // without arithmetic, it'd do concatenation
 }
 
+// if command returns code 0, set list
+// to the output and run the block
+if let list = grep("let a", "demo.ash") {
+  echo("Found something");
+  echo(list);
+} else {
+  echo("Found nothing");
+}
+
+// while command is returning code 0,
+// set var to it's output and run this code
+while let var = grep("abcd", "file") {
+  echo(var);
+}
+
 fn hello(name, age, cwd) {
   // same thing, the names are just aliases
   echo("Hello ${name} aged ${age}, we're in ${cwd}");

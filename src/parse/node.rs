@@ -1,11 +1,11 @@
 use super::{
+  declaration::Declaration,
   function::Function,
   function_call::FunctionCall,
   r#for::{For, Foreach},
-  r#if::If,
-  r#while::While,
+  r#if::{If, IfLet},
+  r#while::{While, WhileLet},
   value::Value,
-  declaration::Declaration,
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -19,9 +19,11 @@ pub enum Node {
   Declaration(Declaration),
   Expression(Value),
   If(If),
+  IfLet(IfLet),
   For(For),
   Foreach(Foreach),
   While(While),
+  WhileLet(WhileLet),
   Return(u8),
   Continue,
   Break,

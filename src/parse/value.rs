@@ -256,3 +256,24 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<Value> {
 pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   Ok(Node::Value(parse_inner(ph)?))
 }
+
+pub fn parse_inline_let(ph: &mut ParseHelper) -> ParserResult<(String, FunctionCall)> {
+  check_token!(ph, TT::Let);
+  ph.advance();
+
+  let name = match ph.peek(0) {
+    Some(TT::Identifier(name)) => name.clone(),
+    Some(_) => return Err(Error::unexpected(ph)),
+    None => return Err(Error::end(ph)),
+  };
+
+  ph.advance();
+
+  check_token!(ph, TT::Assignment);
+
+  ph.advance();
+
+  let call = function_call::parse_inner(ph)?;
+
+  Ok((name, call))
+}
