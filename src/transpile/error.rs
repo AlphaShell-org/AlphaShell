@@ -17,6 +17,10 @@ impl Error {
       node: node.clone(),
     }
   }
+
+  pub fn invalid(node: &Node) -> Self {
+    Self::new("Invalid node type", node)
+  }
 }
 
 impl fmt::Display for Error {

@@ -301,8 +301,9 @@ pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> Transp
 }
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
-  match node {
-    Node::Value(value) => transpile_inner(t, value, node),
-    _ => Err(Error::new("Invalid node type", node)),
+  if let Node::Value(value) = node {
+    transpile_inner(t, value, node)
+  } else {
+    Err(Error::invalid(node))
   }
 }

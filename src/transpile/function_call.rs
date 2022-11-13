@@ -80,8 +80,9 @@ pub fn transpile_inner(
 }
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
-  match node {
-    Node::FunctionCall(call) => transpile_inner(t, call, node),
-    _ => Err(Error::new("Invalid node type", node)),
+  if let Node::FunctionCall(call) = node {
+    transpile_inner(t, call, node)
+  } else {
+    Err(Error::invalid(node))
   }
 }
