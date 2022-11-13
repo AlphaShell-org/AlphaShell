@@ -80,7 +80,7 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
         write!(transpiled, "[{key}]={} ", transpile_inner(t, value, node)?).unwrap();
       }
 
-      Ok(format!("({})", transpiled))
+      Ok(format!("({transpiled})"))
     }
   }
 }

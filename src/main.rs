@@ -207,7 +207,7 @@ fn warn_if_not_quiet(args: &Args) {
 
 fn create_directory(args: &Args, directory: &Path) {
   verbose!(args, "Creating directory '{}'", directory.display());
-  if let Err(e) = fs::create_dir_all(&directory) {
+  if let Err(e) = fs::create_dir_all(directory) {
     error!(
       "Couldn't create directory '{}', error: '{e}'",
       directory.display()

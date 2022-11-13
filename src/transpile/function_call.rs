@@ -44,7 +44,7 @@ pub fn transpile_inner(
       return Ok(t.use_indent(&format!("(( {args} ))")));
     }
 
-    return Ok(format!("$(( {} ))", args));
+    return Ok(format!("$(( {args} ))"));
   }
 
   let basic_call = if args.is_empty() {
@@ -72,7 +72,7 @@ pub fn transpile_inner(
 
   let call = match t.get_block() {
     Some(BlockType::FunctionCall) => call,
-    Some(BlockType::Expression) => format!(r#""$({})""#, call),
+    Some(BlockType::Expression) => format!(r#""$({call})""#),
     _ => t.use_indent(&call),
   };
 
