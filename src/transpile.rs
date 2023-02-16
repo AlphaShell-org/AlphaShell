@@ -18,6 +18,7 @@ mod foreach;
 mod function;
 mod function_call;
 mod r#if;
+mod r#return;
 mod source;
 mod value;
 mod r#while;
@@ -48,10 +49,10 @@ pub fn inner(tree: &[Node], t: &mut Transpiler) -> TranspileResult<String> {
       Value(_) => value::transpile(t, node),
       While(_) => r#while::transpile(t, node),
       WhileLet(_) => r#while::transpile_let(t, node),
+      Return(_) => r#return::transpile(t, node),
 
       Break => Ok(t.use_indent("break")),
       Continue => Ok(t.use_indent("continue")),
-      Return(value) => Ok(t.use_indent(&format!("return {value}"))),
 
       Empty => Ok(String::new()),
     }?;

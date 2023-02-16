@@ -52,9 +52,9 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
     }
     Literal::Float(num) => Ok(num.to_string()),
     Literal::Bool(boolean) => Ok(if *boolean {
-      "/bin/true".to_string()
+      "0".to_string()
     } else {
-      "/bin/false".to_string()
+      "1".to_string()
     }),
     Literal::Array(array) => {
       let mut items = Vec::new();

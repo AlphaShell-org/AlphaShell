@@ -24,7 +24,7 @@ pub enum Node {
   Foreach(Foreach),
   While(While),
   WhileLet(WhileLet),
-  Return(u8),
+  Return(Value),
   Continue,
   Break,
 
