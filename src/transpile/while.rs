@@ -2,9 +2,9 @@ use super::{
   block,
   error::{Error, TranspileResult},
   function_call,
+  r#if::transpile_condition,
   transpiler::{BlockType, Transpiler},
   utils::random_string,
-  value,
 };
 use crate::parse::{
   node::Node,
@@ -13,10 +13,8 @@ use crate::parse::{
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   if let Node::While(While { condition, block }) = node {
-    t.push_block(BlockType::Condition);
-    let condition = value::transpile_inner(t, condition, node)?;
-    t.pop_block();
-    let head = t.use_indent(&format!("while [[ {condition} ]]; do"));
+    let condition = transpile_condition(t, condition, node)?;
+    let head = t.use_indent(&format!("while {condition}; do"));
     let block = block::transpile_inner(t, block)?;
     let end = t.use_indent("done");
 

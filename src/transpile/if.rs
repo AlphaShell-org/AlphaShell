@@ -11,7 +11,24 @@ use super::{
 use crate::parse::{
   node::Node,
   r#if::{Else, If, IfLet},
+  value::Value,
 };
+
+pub fn transpile_condition(
+  t: &mut Transpiler,
+  condition: &Value,
+  node: &Node,
+) -> TranspileResult<String> {
+  t.push_block(BlockType::Condition);
+  let string = value::transpile_inner(t, condition, node)?;
+  t.pop_block();
+
+  if matches!(condition, Value::FunctionCall(..)) {
+    Ok(string)
+  } else {
+    Ok(format!("[[ {string} ]]"))
+  }
+}
 
 pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
   if let Node::If(If {
@@ -20,10 +37,8 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
     block,
   }) = node
   {
-    t.push_block(BlockType::Condition);
-    let condition = value::transpile_inner(t, condition, node)?;
-    t.pop_block();
-    let head = t.use_indent(&format!("if [[ {condition} ]]; then"));
+    let condition = transpile_condition(t, condition, node)?;
+    let head = t.use_indent(&format!("if {condition}; then"));
     let block = block::transpile_inner(t, block)?;
 
     let mut string_else = String::new();
@@ -40,11 +55,9 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
         Else::Elif(r#if) => {
           r#outer_else = &r#if.r#else;
 
-          t.push_block(BlockType::Condition);
-          let condition = value::transpile_inner(t, &r#if.condition, node)?;
-          t.pop_block();
+          let condition = transpile_condition(t, &r#if.condition, node)?;
 
-          writeln!(string_else, "{}", &format!("elif [[ {condition} ]]; then")).unwrap();
+          writeln!(string_else, "{}", &format!("elif {condition}; then")).unwrap();
 
           let block = block::transpile_inner(t, &r#if.r#block)?;
 
