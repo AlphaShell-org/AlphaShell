@@ -113,6 +113,7 @@ fn transpile_binary_expression(
       BinaryOperator::Multiply => "*",
       BinaryOperator::Divide => "/",
       BinaryOperator::Modulo => "%",
+      BinaryOperator::Power => "**",
       op => unimplemented!("{op:?}"),
     };
 
@@ -132,6 +133,8 @@ fn transpile_binary_expression(
       BinaryOperator::RegexMatch => "=~",
       BinaryOperator::And => "&&",
       BinaryOperator::Or => "||",
+      BinaryOperator::Modulo => "%",
+      BinaryOperator::Power => "**",
       op => unimplemented!("{op:?}"),
     };
 

@@ -35,6 +35,7 @@ pub enum BinaryOperator {
   Multiply,
   Divide,
   Modulo,
+  Power,
   Equal,
   NotEqual,
   Greater,
@@ -54,6 +55,7 @@ impl BinaryOperator {
       TT::Multiply => Some(Self::Multiply),
       TT::Divide => Some(Self::Divide),
       TT::Modulo => Some(Self::Modulo),
+      TT::Power => Some(Self::Power),
       TT::Equal => Some(Self::Equal),
       TT::NotEqual => Some(Self::NotEqual),
       TT::Greater => Some(Self::Greater),
@@ -159,6 +161,7 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
       ph.advance();
       Ok(Value::Literal(Literal::Float(num)))
     }
+
     Some(TT::Boolean(boolean)) => {
       let boolean = *boolean;
       ph.advance();
