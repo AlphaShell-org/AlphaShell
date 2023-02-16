@@ -18,7 +18,7 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
     let params = params
       .iter()
       .enumerate()
-      .map(|(i, param)| t.use_indent(&format!("local {param}=${i}\n")))
+      .map(|(i, param)| t.use_indent(&format!("local {param}=${}\n", i + 1)))
       .collect::<String>();
     t.pop_block();
 
