@@ -20,24 +20,16 @@ impl ParseHelper {
     }
   }
 
-  pub fn get(&self, offset: i32) -> Option<&Token> {
-    let i = self.index as i32 + offset;
+  pub fn get(&self, offset: isize) -> Option<&Token> {
+    let i = self.index.saturating_add_signed(offset);
 
-    if i < 0 {
-      return None;
-    }
-
-    self.tokens.get(i as usize)
+    self.tokens.get(i)
   }
 
-  pub fn peek(&self, offset: i32) -> Option<&TokenType> {
-    let i = self.index as i32 + offset;
+  pub fn peek(&self, offset: isize) -> Option<&TokenType> {
+    let i = self.index.saturating_add_signed(offset);
 
-    if i < 0 {
-      return None;
-    }
-
-    self.tokens.get(i as usize).map(|token| &token.r#type)
+    self.tokens.get(i).map(|token| &token.r#type)
   }
 
   pub fn get_tokens(&self) -> &Vec<Token> {
