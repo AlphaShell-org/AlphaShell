@@ -57,7 +57,7 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
 
           let condition = transpile_condition(t, &r#if.condition, node)?;
 
-          writeln!(string_else, "{}", &format!("elif {condition}; then")).unwrap();
+          writeln!(string_else, "elif {condition}; then").unwrap();
 
           let block = block::transpile_inner(t, &r#if.r#block)?;
 
