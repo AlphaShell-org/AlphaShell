@@ -10,14 +10,14 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   ph.advance();
 
   match ph.peek(0) {
-    Some(TT::String(string)) => ph.variables.insert(string.clone()),
+    Some(TT::Identifier(string) | TT::String(string)) => ph.variables.insert(string.clone()),
     Some(_) => return Err(Error::unexpected(ph)),
     None => return Err(Error::end(ph)),
   };
 
-  ph.advance();
-
   loop {
+    ph.advance();
+
     match ph.peek(0) {
       Some(TT::Comma) => ph.advance(),
       Some(TT::Semicolon) => break,
@@ -25,10 +25,8 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
       None => return Err(Error::end(ph)),
     };
 
-    ph.advance();
-
     match ph.peek(0) {
-      Some(TT::String(string)) => ph.variables.insert(string.clone()),
+      Some(TT::Identifier(string) | TT::String(string)) => ph.variables.insert(string.clone()),
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
     };
