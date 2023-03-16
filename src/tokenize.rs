@@ -313,14 +313,7 @@ fn load_operator(state: &mut State) -> Result<Token> {
     '<' => operator_with_equal!(Less, LessEqual),
     '>' => operator_with_equal!(Greater, GreaterEqual),
     '!' => operator_with_equal!(Not, NotEqual),
-    '~' => {
-      if state.next() == Some('=') {
-        state.advance();
-        TT::RegexMatch
-      } else {
-        return Err(Error::new("Unexpected token '~'", state));
-      }
-    }
+    '~' => TT::RegexMatch,
     '.' => {
       if state.next() == Some('.') {
         state.advance();
