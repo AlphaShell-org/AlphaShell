@@ -64,7 +64,14 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   ph.advance();
 
-  let block = block::parse(ph, params.iter().cloned().collect::<HashSet<_>>())?;
+  let variables = ph
+    .variables
+    .iter()
+    .chain(params.iter())
+    .cloned()
+    .collect::<HashSet<_>>();
+
+  let block = block::parse(ph, variables)?;
   let node = Node::Function(Function::new(name, params, Box::new(block)));
 
   Ok(node)
