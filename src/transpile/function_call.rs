@@ -71,7 +71,7 @@ pub fn transpile_inner(
   };
 
   let call = match t.get_block() {
-    Some(BlockType::FunctionCall) => call,
+    Some(BlockType::FunctionCall | BlockType::Condition) => call,
     Some(BlockType::Expression) => format!(r#""$({call})""#),
     _ => t.use_indent(&call),
   };
