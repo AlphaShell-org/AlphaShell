@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! check_token {
-  ($ph:ident, $(|)? $( $pattern:pat_param )|+ ) => {
+  ($ph:expr, $(|)? $( $pattern:pat_param )|+ ) => {
     match $ph.peek(0) {
       Some($( $pattern )|+)  => {},
       Some(_) => return Err(Error::unexpected($ph)),

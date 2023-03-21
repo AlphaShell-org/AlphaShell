@@ -24,11 +24,15 @@ pub mod r#return;
 pub mod value;
 pub mod r#while;
 
-use crate::types::{
-  Token,
-  TokenType::{
-    Break, Continue, Dollar, Export, External, For, Function, Identifier, If, Import, LParen, Let,
-    Return, Source, While,
+use crate::{
+  check_token,
+  types::{
+    Token,
+    TokenType::{
+      Break, Continue, Dollar, Export, External, For, Function, Identifier, If, Import, LParen,
+      Let, Return, Source, While,
+    },
+    TT,
   },
 };
 
@@ -36,6 +40,15 @@ pub fn parse(tokens: &[Token]) -> ParserResult<Vec<Node>> {
   let variables = (0..10).map(|x| x.to_string()).collect();
 
   inner(tokens, variables).map(|(nodes, _)| nodes)
+}
+
+macro_rules! simple_token {
+  ($ph:expr, $tok:expr) => {{
+    $ph.advance();
+    check_token!(&$ph, TT::Semicolon);
+    $ph.advance();
+    Ok($tok)
+  }};
 }
 
 pub fn inner(
@@ -60,8 +73,8 @@ pub fn inner(
       While => r#while::parse(&mut ph),
       If => r#if::parse(&mut ph),
       Return => r#return::parse(&mut ph),
-      Continue => Ok(Node::Continue),
-      Break => Ok(Node::Break),
+      Continue => simple_token!(ph, Node::Continue),
+      Break => simple_token!(ph, Node::Break),
       External => external::parse(&mut ph),
 
       Identifier(..) | Dollar => {
