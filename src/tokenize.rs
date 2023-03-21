@@ -247,6 +247,11 @@ fn load_string(state: &mut State) -> Result<Token> {
   state.advance();
 
   while state.valid_char() && !(state.char() == quote_type && state.prev() != '\\') {
+    if state.char() == '\\' && state.prev() != '\\' {
+      state.advance();
+      continue;
+    }
+
     buf.push(state.char());
     state.advance();
   }
