@@ -6,13 +6,21 @@ use super::{
   function_call,
   transpiler::{BlockType, Transpiler},
   utils::random_string,
-  value,
+  value::{self, transpile_binary_operator},
 };
 use crate::parse::{
   node::Node,
   r#if::{Else, If, IfLet},
   value::Value,
 };
+
+fn is_function_call(condition: &Value) -> bool {
+  if let Value::BinaryExpression(right, _, left) = condition {
+    is_function_call(right) || is_function_call(left)
+  } else {
+    matches!(condition, Value::FunctionCall(_))
+  }
+}
 
 pub fn transpile_condition(
   t: &mut Transpiler,
@@ -23,8 +31,19 @@ pub fn transpile_condition(
   let string = value::transpile_inner(t, condition, node)?;
   t.pop_block();
 
-  if matches!(condition, Value::FunctionCall(..)) {
+  if matches!(condition, Value::FunctionCall(_)) {
     Ok(string)
+  } else if let Value::BinaryExpression(left, op, right) = condition {
+    if is_function_call(right) || is_function_call(left) {
+      Ok(format!(
+        "{} {} {}",
+        transpile_condition(t, left, node)?,
+        transpile_binary_operator(op),
+        transpile_condition(t, right, node)?
+      ))
+    } else {
+      Ok(format!("[[ {string} ]]"))
+    }
   } else {
     Ok(format!("[[ {string} ]]"))
   }
