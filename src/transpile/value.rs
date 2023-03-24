@@ -100,7 +100,7 @@ fn transpile_unary_expression(
     UnaryOperator::Minus => "-",
   };
 
-  Ok(operator.to_owned() + &transpile_inner(t, right, node)?)
+  Ok(format!("{operator} {}", transpile_inner(t, right, node)?))
 }
 
 fn transpile_binary_expression(
