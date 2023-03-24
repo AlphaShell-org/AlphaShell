@@ -21,15 +21,18 @@ impl Error {
 
   pub fn unexpected(ph: &ParseHelper) -> Self {
     let token = ph.get(0).unwrap();
-
     #[cfg(debug_assertions)]
-    println!(
-      "{}\ncurrent index: {}",
+    panic!(
+      "{}\ncurrent index: {}\nUnexpected token {:?}",
       ph.pretty_print_tokens(),
-      ph.get_index()
+      ph.get_index(),
+      token
     );
 
-    Self::new(&format!("Unexpected token {token}"), Some(token))
+    #[cfg(not(debug_assertions))]
+    {
+      Self::new(&format!("Unexpected token {token}"), Some(token))
+    }
   }
 
   pub fn duplicate_variable(ph: &ParseHelper) -> Self {
