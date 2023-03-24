@@ -103,6 +103,26 @@ fn transpile_unary_expression(
   Ok(format!("{operator} {}", transpile_inner(t, right, node)?))
 }
 
+pub fn transpile_binary_operator(operator: &BinaryOperator) -> &str {
+  match operator {
+    BinaryOperator::Add => "+",
+    BinaryOperator::Sub => "-",
+    BinaryOperator::Multiply => "*",
+    BinaryOperator::Divide => "/",
+    BinaryOperator::Modulo => "%",
+    BinaryOperator::Power => "**",
+    BinaryOperator::Equal => "==",
+    BinaryOperator::NotEqual => "!=",
+    BinaryOperator::Greater => "-gt",
+    BinaryOperator::GreaterEqual => "-ge",
+    BinaryOperator::Less => "-lt",
+    BinaryOperator::LessEqual => "-le",
+    BinaryOperator::RegexMatch => "=~",
+    BinaryOperator::And => "&&",
+    BinaryOperator::Or => "||",
+  }
+}
+
 fn transpile_binary_expression(
   t: &mut Transpiler,
   left: &Value,
@@ -112,12 +132,12 @@ fn transpile_binary_expression(
 ) -> TranspileResult<String> {
   if matches!(t.get_block(), Some(BlockType::Arithmetics)) {
     let operator = match operator {
-      BinaryOperator::Add => "+",
-      BinaryOperator::Sub => "-",
-      BinaryOperator::Multiply => "*",
-      BinaryOperator::Divide => "/",
-      BinaryOperator::Modulo => "%",
-      BinaryOperator::Power => "**",
+      BinaryOperator::Add
+      | BinaryOperator::Sub
+      | BinaryOperator::Multiply
+      | BinaryOperator::Divide
+      | BinaryOperator::Modulo
+      | BinaryOperator::Power => transpile_binary_operator(operator),
       op => unimplemented!("{op:?}"),
     };
 
@@ -128,17 +148,17 @@ fn transpile_binary_expression(
     ))
   } else if t.search(&BlockType::Condition) {
     let operator = match operator {
-      BinaryOperator::Equal => "==",
-      BinaryOperator::NotEqual => "!=",
-      BinaryOperator::Greater => "-gt",
-      BinaryOperator::GreaterEqual => "-ge",
-      BinaryOperator::Less => "-lt",
-      BinaryOperator::LessEqual => "-le",
-      BinaryOperator::RegexMatch => "=~",
-      BinaryOperator::And => "&&",
-      BinaryOperator::Or => "||",
-      BinaryOperator::Modulo => "%",
-      BinaryOperator::Power => "**",
+      BinaryOperator::Equal
+      | BinaryOperator::NotEqual
+      | BinaryOperator::Greater
+      | BinaryOperator::GreaterEqual
+      | BinaryOperator::Less
+      | BinaryOperator::LessEqual
+      | BinaryOperator::RegexMatch
+      | BinaryOperator::And
+      | BinaryOperator::Or
+      | BinaryOperator::Modulo
+      | BinaryOperator::Power => transpile_binary_operator(operator),
       op => unimplemented!("{op:?}"),
     };
 
@@ -192,7 +212,6 @@ fn transpile_ternary_expression(
 
 fn transpile_member_expression(
   t: &mut Transpiler,
-
   left: &Value,
   right: &Value,
   node: &Node,
