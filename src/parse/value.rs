@@ -120,6 +120,10 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
         return Err(Error::undefined_variable(ph));
       }
 
+      if ph.peek(1) == Some(&TT::Pipe) {
+        return Ok(Value::FunctionCall(function_call::parse_inner(ph)?));
+      }
+
       let name = name.clone();
       ph.advance();
       Ok(Value::Identifier(name))

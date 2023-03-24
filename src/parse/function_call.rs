@@ -37,15 +37,22 @@ enum FType {
   Aritmetics,
   String(String),
   RawString(String),
+  Variable(String),
 }
 
 pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
   let (name, type_) = if let Some(token) = ph.peek(0) {
     match token {
-      TT::Identifier(name) => (name.clone(), FType::Call),
-      TT::String(string) => ("echo".to_owned(), FType::String(string.clone())),
-      TT::RawString(string) => ("echo".to_owned(), FType::RawString(string.clone())),
-      TT::Dollar => ("$".to_string(), FType::Aritmetics),
+      TT::Identifier(name) => {
+        if ph.peek(1) == Some(&TT::LParen) {
+          (name.clone(), FType::Call)
+        } else {
+          ("printf".to_owned(), FType::Variable(name.clone()))
+        }
+      }
+      TT::String(string) => ("printf".to_owned(), FType::String(string.clone())),
+      TT::RawString(string) => ("printf".to_owned(), FType::RawString(string.clone())),
+      TT::Dollar => ("$".to_owned(), FType::Aritmetics),
       _ => return Err(Error::unexpected(ph)),
     }
   } else {
@@ -57,6 +64,7 @@ pub fn parse_inner(ph: &mut ParseHelper) -> ParserResult<FunctionCall> {
   let args = match &type_ {
     FType::String(string) => vec![Value::Literal(Literal::String(string.clone()))],
     FType::RawString(string) => vec![Value::Literal(Literal::RawString(string.clone()))],
+    FType::Variable(name) => vec![Value::Identifier(name.clone())],
     _ => parse_args(ph)?,
   };
 
