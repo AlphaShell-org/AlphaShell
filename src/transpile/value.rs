@@ -13,6 +13,8 @@ use crate::parse::{
 fn transpile_identifier(t: &mut Transpiler, name: &String) -> String {
   if t.search(&BlockType::Identifier) || t.search(&BlockType::Arithmetics) {
     name.clone()
+  } else if t.search(&BlockType::Raw) {
+    format!("${name}")
   } else if t.search(&BlockType::Foreach) {
     format!(r#""${{{name}[@]}}""#)
   } else {
