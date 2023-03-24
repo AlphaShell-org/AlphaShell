@@ -122,7 +122,9 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
 
   let node = match ph.peek(0) {
     Some(TT::Integer(_)) => parse_for(ph, variable)?,
-    Some(TT::At | TT::LBracket | TT::Identifier(..)) => parse_foreach(ph, variable)?,
+    Some(TT::At | TT::LBracket | TT::Identifier(..) | TT::String(..)) => {
+      parse_foreach(ph, variable)?
+    }
     Some(_) => return Err(Error::unexpected(ph)),
     None => return Err(Error::end(ph)),
   };
