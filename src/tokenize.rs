@@ -20,18 +20,20 @@ static KEYWORDS: phf::Map<&'static str, TokenType> = phf::phf_map! {
   "continue" => TT::Continue,
   "break" => TT::Break,
   "external" => TT::External,
+  "switch" => TT::Switch,
+  "case" => TT::Case,
 };
 
-pub struct State<'a> {
-  lines: Vec<&'a str>,
+pub struct State {
+  lines: Vec<Vec<char>>,
   tokens: Vec<Token>,
   comment_block: usize,
   line: usize,
   column: usize,
 }
 
-impl<'a> State<'a> {
-  pub fn new(lines: Vec<&'a str>) -> State<'a> {
+impl State {
+  pub fn new(lines: Vec<Vec<char>>) -> State {
     State {
       lines,
       tokens: Vec::new(),
@@ -42,11 +44,11 @@ impl<'a> State<'a> {
   }
 
   fn char_at(&self, line: usize, column: usize) -> char {
-    self.lines[line].chars().nth(column).unwrap()
+    self.lines[line][column]
   }
 
-  fn line(&self) -> &str {
-    self.lines[self.line]
+  fn line(&self) -> &Vec<char> {
+    &self.lines[self.line]
   }
 
   fn char(&self) -> char {
@@ -378,7 +380,7 @@ fn classify_str(str: &str) -> TokenType {
 }
 
 pub fn tokenize(s: &str) -> Result<Vec<Token>> {
-  let lines: Vec<_> = s.lines().collect();
+  let lines: Vec<Vec<char>> = s.lines().map(|line| line.chars().collect()).collect();
   let lines_length = lines.len();
   let mut state = State::new(lines);
 

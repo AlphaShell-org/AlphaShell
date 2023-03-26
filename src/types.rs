@@ -52,6 +52,8 @@ pub enum TokenType {
   While,
   Continue,
   Break,
+  Switch,
+  Case,
 
   // Operators
   Assignment,

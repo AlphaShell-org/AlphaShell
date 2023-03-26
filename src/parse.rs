@@ -21,6 +21,7 @@ pub mod r#if;
 pub mod import;
 pub mod map;
 pub mod r#return;
+pub mod switch;
 pub mod value;
 pub mod r#while;
 
@@ -30,7 +31,7 @@ use crate::{
     Token,
     TokenType::{
       Break, Continue, Dollar, Export, External, For, Function, Identifier, If, Import, LParen,
-      Let, Return, Source, While,
+      Let, Return, Source, Switch, While,
     },
     TT,
   },
@@ -76,6 +77,7 @@ pub fn inner(
       Continue => simple_token!(ph, Node::Continue),
       Break => simple_token!(ph, Node::Break),
       External => external::parse(&mut ph),
+      Switch => switch::parse(&mut ph),
 
       Identifier(..) | Dollar => {
         if let Some(next) = ph.peek(1) {

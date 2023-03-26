@@ -5,6 +5,7 @@ use super::{
   r#for::{For, Foreach},
   r#if::{If, IfLet},
   r#while::{While, WhileLet},
+  switch::Switch,
   value::Value,
 };
 
@@ -27,6 +28,7 @@ pub enum Node {
   Return(Value),
   Continue,
   Break,
+  Switch(Switch),
 
   Empty,
 }
