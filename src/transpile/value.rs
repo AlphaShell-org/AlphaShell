@@ -50,7 +50,7 @@ fn transpile_literal(t: &mut Transpiler, value: &Literal, node: &Node) -> Transp
       if t.search(&BlockType::Arithmetics) || t.search(&BlockType::Raw) {
         Ok(num.to_string())
       } else {
-        eprintln!("Warning: Integer literal outside arithmetic context");
+        // eprintln!("Warning: Integer literal outside arithmetic context");
         Ok(format!("\"{num}\""))
       }
     }
