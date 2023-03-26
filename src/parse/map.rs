@@ -12,7 +12,7 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<(String, Value)>> {
   let mut items = Vec::new();
   loop {
     let key = match ph.peek(0) {
-      Some(TT::Identifier(key)) => key.clone(),
+      Some(TT::Identifier(key) | TT::String(key) | TT::RawString(key)) => key.clone(),
       Some(TT::RBrace) => break,
       Some(_) => return Err(Error::unexpected(ph)),
       None => return Err(Error::end(ph)),
