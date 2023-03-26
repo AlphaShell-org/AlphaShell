@@ -47,9 +47,9 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
     None => return Err(Error::end(ph)),
   };
 
-  if ph.variables.get(&name).is_some() {
-    return Err(Error::duplicate_variable(ph));
-  }
+  // if ph.variables.get(&name).is_some() {
+  //   return Err(Error::duplicate_variable(ph));
+  // }
 
   ph.variables.insert(name.clone());
   if r#type == Type::Export {
