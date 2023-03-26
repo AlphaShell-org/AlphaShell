@@ -91,7 +91,11 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Node>> {
         let contents = read_file(Path::new(&file), &token)?;
 
         let tokens = unwrap_or_error!(crate::tokenize(&contents), file);
-        let tree = unwrap_or_error!(crate::parse(&tokens), file);
+        let (tree, exports) =
+          unwrap_or_error!(crate::parse::inner(&tokens, ph.variables.clone()), file);
+
+        ph.variables.extend(exports.iter().cloned());
+        ph.exports.extend(exports.iter().cloned());
 
         Ok(tree)
       })
