@@ -5,19 +5,19 @@ use super::{
   parse_helper::ParseHelper,
   value::{self, Value},
 };
-use crate::{check_token, types::TT};
+use crate::{check_token, parse::value::Literal, types::TT};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct For {
-  pub start: i32,
-  pub end: i32,
-  pub step: i32,
+  pub start: Value,
+  pub end: Value,
+  pub step: Value,
   pub variable: String,
   pub block: Box<Node>,
 }
 
 impl For {
-  pub fn new(start: i32, end: i32, step: i32, variable: String, block: Box<Node>) -> Self {
+  pub fn new(start: Value, end: Value, step: Value, variable: String, block: Box<Node>) -> Self {
     Self {
       start,
       end,
@@ -46,38 +46,18 @@ impl Foreach {
 }
 
 fn parse_for(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
-  let start = match ph.peek(0) {
-    Some(TT::Integer(num)) => *num,
-    Some(_) => return Err(Error::unexpected(ph)),
-    None => return Err(Error::end(ph)),
-  };
+  let start = value::parse_inner(ph)?;
 
-  ph.advance();
   check_token!(ph, TT::Range);
   ph.advance();
 
-  let end = match ph.peek(0) {
-    Some(TT::Integer(num)) => *num,
-    Some(_) => return Err(Error::unexpected(ph)),
-    None => return Err(Error::end(ph)),
-  };
-
-  ph.advance();
+  let end = value::parse_inner(ph)?;
 
   let step = if let Some(TT::Range) = ph.peek(0) {
     ph.advance();
-
-    let step = match ph.peek(0) {
-      Some(TT::Integer(num)) => *num,
-      Some(_) => return Err(Error::unexpected(ph)),
-      None => return Err(Error::end(ph)),
-    };
-
-    ph.advance();
-
-    step
+    value::parse_inner(ph)?
   } else {
-    1
+    Value::Literal(Literal::Int(1))
   };
 
   let mut variables = ph.variables.clone();
