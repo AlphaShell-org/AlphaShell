@@ -18,7 +18,7 @@ pub fn transpile(t: &mut Transpiler, node: &Node) -> TranspileResult<String> {
     let start = value::transpile_inner(t, start, node)?;
     let end = value::transpile_inner(t, end, node)?;
     let step = value::transpile_inner(t, step, node)?;
-    let head = t.use_indent(&format!("for {variable} in {{{start}..{end}..{step}}}; do"));
+    let head = t.use_indent(&format!("for {variable} ({{{start}..{end}..{step}}}); do"));
     let block = block::transpile(t, block)?;
     let end = t.use_indent("done");
 
