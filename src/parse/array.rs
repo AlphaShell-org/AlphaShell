@@ -14,7 +14,8 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Value>> {
 
   let mut values = Vec::new();
 
-  if ph.peek(0) == Some(&TT::LBracket) {
+  if ph.peek(0) == Some(&TT::RBracket) {
+    ph.advance();
     return Ok(values);
   }
 
