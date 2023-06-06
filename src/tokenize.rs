@@ -218,19 +218,14 @@ fn load_flag(state: &mut State) -> Result<Token> {
     return Err(Error::new("Invalid flag format", state));
   }
 
-  if state.valid_char() && (is_alpha(state.char()) || matches!(state.char(), '_' | '-' | '.' | '='))
-  {
+  if state.valid_char() && (is_alpha(state.char()) || matches!(state.char(), '_' | '.' | '=')) {
     buf.push(state.char());
     state.advance();
   }
 
-  while state.valid_char() {
-    let char = state.char();
-
-    if !is_alpha_num(char) && !matches!(char, '_' | '-' | '.' | '=') {
-      break;
-    }
-
+  while state.valid_char()
+    && (is_alpha_num(state.char()) || matches!(state.char(), '_' | '-' | '.' | '='))
+  {
     buf.push(state.char());
     state.advance();
   }

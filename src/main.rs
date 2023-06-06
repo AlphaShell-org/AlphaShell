@@ -3,6 +3,7 @@
 use std::{
   fs::{self, File},
   io::{self, prelude::Read, Write},
+  os::unix::prelude::PermissionsExt,
   path::{Path, PathBuf},
   process,
   time::Instant,
@@ -53,6 +54,10 @@ struct Args {
   /// Verbose output
   #[clap(short, long, action = ArgAction::Count)]
   verbose: u8,
+
+  /// Make the output file executable and add shebang
+  #[clap(short, long)]
+  executable: bool,
 }
 
 macro_rules! error {
@@ -176,6 +181,10 @@ fn run_for_file(
     let tree = parse(&tokens).unwrap_or_else(|e| error!("{e}"));
     let code = transpile(&tree).unwrap_or_else(|e| error!("{e}"));
 
+    if args.executable {
+      writeln!(output, "#!/usr/bin/env zsh")?;
+    }
+
     writeln!(output, "{code}")?;
 
     Ok(())
@@ -227,8 +236,24 @@ fn create_file(args: &Args, path: &Path) -> File {
   }
 
   verbose!(args, "Creating file: {}", path.display());
-  File::create(path)
-    .unwrap_or_else(|e| error!("Couldn't create file '{}', error: '{e}'", path.display()))
+  let file = File::create(path)
+    .unwrap_or_else(|e| error!("Couldn't create file '{}', error: '{e}'", path.display()));
+
+  make_executable(args, path).unwrap_or_else(|e| {
+    error!(
+      "Couldn't make file executable '{}', error: '{e}'",
+      path.display()
+    );
+  });
+
+  file
+}
+
+fn make_executable(args: &Args, path: &Path) -> io::Result<()> {
+  verbose!(args, "Making file executable: {}", path.display());
+  let mut perms = fs::metadata(path)?.permissions();
+  perms.set_mode(0o755);
+  fs::set_permissions(path, perms)
 }
 
 fn read(source: &mut dyn io::Read) -> io::Result<String> {

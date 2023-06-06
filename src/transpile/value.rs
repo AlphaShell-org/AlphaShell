@@ -282,7 +282,11 @@ fn transpile_assignment(
 
     let right = transpile_inner(t, right, node)?;
 
-    Ok(format!("{left}{operator}{right}",))
+    t.pop_block();
+    let string = t.use_indent(&format!("{left}{operator}{right}"));
+    t.push_block(BlockType::Expression);
+
+    Ok(string)
   }
 }
 
