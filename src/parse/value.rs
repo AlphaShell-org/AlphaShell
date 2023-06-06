@@ -106,11 +106,21 @@ pub enum Value {
   MemberExpression(Box<Value>, Box<Value>),
   Assignment(Box<Value>, AssignmentOperator, Box<Value>),
   FunctionCall(FunctionCall),
+  Parenthesized(Box<Value>),
 }
 
 fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
   let token = ph.peek(0);
+
   let mut value = match token {
+    Some(TT::LParen) => {
+      ph.advance();
+      let value = parse_inner(ph)?;
+      check_token!(ph, TT::RParen);
+      ph.advance();
+      Ok(Value::Parenthesized(Box::new(value)))
+    }
+
     Some(TT::Identifier(..) | TT::Dollar) if ph.peek(1) == Some(&TT::LParen) => {
       Ok(Value::FunctionCall(function_call::parse_inner(ph)?))
     }

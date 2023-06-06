@@ -321,6 +321,10 @@ pub fn transpile_inner(t: &mut Transpiler, value: &Value, node: &Node) -> Transp
       transpile_assignment(t, left, operator, right, node)
     }
     Value::FunctionCall(function_call) => function_call::transpile_inner(t, function_call, node),
+    Value::Parenthesized(value) => Ok(format!(
+      "({value})",
+      value = transpile_inner(t, value, node)?
+    )),
   };
 
   if indent {
