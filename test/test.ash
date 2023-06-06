@@ -44,6 +44,10 @@ if a > 10 { echo("a is larger than 10"); }
 if person != "Peter" { echo("${person} is not Peter"); }
 if a <= 10 && b > 3 || person == "Jack" { echo("Complex condition satisfied"); }
 
+// parenthesis for operation precedence, otherwise follows native zsh order
+if (0==1 && 1==1) || 1==1 { echo("Should print"); }
+if 0==1 && (1==1 || 1==1) { echo("Shouldn't print"); }
+
 // export variable from the block scope
 if true { echo("True"); export xyx = "xyz"; }
 echo(xyx);
