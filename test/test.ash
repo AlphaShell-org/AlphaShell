@@ -107,9 +107,9 @@ fn arrayFunction() {
 arrayFunction("a", "b", "c", "d", "e");
 
 let matched = "abcb";
-if matched ~= "abc{2,5}" { // regex matching
+if matched ~ "abc{2,5}" { // regex matching
   echo("matched");
-} elif matched ~= "abc(cb)?" {
+} elif matched ~ "abc(cb)?" {
   echo("matched elif");
 } else {
   echo("not matched");
