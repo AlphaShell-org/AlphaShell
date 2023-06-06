@@ -9,6 +9,7 @@ use super::{
   value::{self, transpile_binary_operator},
 };
 use crate::parse::{
+  function_call::FunctionCall,
   node::Node,
   r#if::{Else, If, IfLet},
   value::Value,
@@ -18,7 +19,13 @@ fn is_function_call(condition: &Value) -> bool {
   if let Value::BinaryExpression(right, _, left) = condition {
     is_function_call(right) || is_function_call(left)
   } else {
-    matches!(condition, Value::FunctionCall(_))
+    if let Value::FunctionCall(FunctionCall { name, .. }) = condition {
+      if name != "$" {
+        return true;
+      }
+    }
+
+    false
   }
 }
 
