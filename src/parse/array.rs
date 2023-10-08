@@ -1,14 +1,13 @@
+use anyhow::Result;
+
 use super::{parse_helper::ParseHelper, value::Value};
 use crate::{
   check_token,
-  parse::{
-    error::{Error, ParserResult},
-    value,
-  },
+  parse::{error, value},
   types::TT,
 };
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Value>> {
+pub fn parse(ph: &mut ParseHelper) -> Result<Vec<Value>> {
   check_token!(ph, TT::LBracket);
   ph.advance();
 
@@ -20,13 +19,14 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Vec<Value>> {
   }
 
   loop {
-    values.push(value::parse_inner(ph)?);
+    let value = value::parse_inner(ph).context("Parsing array value")?;
+    values.push(value);
 
     match ph.peek(0) {
       Some(TT::Comma) => ph.advance(),
       Some(TT::RBracket) => break,
-      Some(_) => return Err(Error::unexpected(ph)),
-      _ => return Err(Error::end(ph)),
+      Some(_) => return Err(error::unexpected(ph)),
+      _ => return Err(error::end(ph)),
     };
   }
 

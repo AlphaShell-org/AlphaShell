@@ -1,15 +1,13 @@
 use std::collections::HashSet;
 
-use super::{
-  error::{Error, ParserResult},
-  node::Node,
-  parse_helper::ParseHelper,
-};
-use crate::{check_token, types::TT};
+use anyhow::Result;
+
+use super::{node::Node, parse_helper::ParseHelper};
+use crate::{check_token, parse::error, types::TT};
 
 pub type Block = Vec<Node>;
 
-pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserResult<Block> {
+pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> Result<Block> {
   check_token!(ph, TT::LBrace);
 
   ph.advance();
@@ -25,7 +23,7 @@ pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserRe
     }
 
     if braces_level == 0 {
-      let (body, exports) = super::inner(&tmp, variables)?;
+      let (body, exports) = super::inner(&tmp, variables).context("Parsing block")?;
 
       ph.variables.extend(exports.iter().cloned());
       ph.exports.extend(exports.iter().cloned());
@@ -39,10 +37,10 @@ pub fn parse_inner(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserRe
     ph.advance();
   }
 
-  Err(Error::end(ph))
+  Err(error::end(ph))
 }
 
-pub fn parse(ph: &mut ParseHelper, variables: HashSet<String>) -> ParserResult<Node> {
+pub fn parse(ph: &mut ParseHelper, variables: HashSet<String>) -> Result<Node> {
   let body = parse_inner(ph, variables)?;
   let block = Node::Block(body);
   Ok(block)

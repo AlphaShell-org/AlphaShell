@@ -71,12 +71,12 @@ fn parse_for(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
 }
 
 fn parse_foreach(ph: &mut ParseHelper, variable: String) -> ParserResult<Node> {
-  let iterable = value::parse_inner(ph)?;
+  let iterable = value::parse_inner(ph).context("Parsing iterable")?;
 
   let mut variables = ph.variables.clone();
   variables.insert(variable.clone());
 
-  let block = block::parse_inner(ph, variables)?;
+  let block = block::parse_inner(ph, variables).context("Parsing foreach body")?;
 
   let node = Node::Foreach(Foreach::new(iterable, variable, block));
 

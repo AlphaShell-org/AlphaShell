@@ -1,10 +1,7 @@
-use super::{
-  error::{Error, ParserResult},
-  node::Node,
-  parse_helper::ParseHelper,
-  value,
-};
-use crate::{check_token, types::TT};
+use anyhow::Result;
+
+use super::{node::Node, parse_helper::ParseHelper, value};
+use crate::{check_token, parse::error, types::TT};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
@@ -29,22 +26,22 @@ impl Declaration {
   }
 }
 
-pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
+pub fn parse(ph: &mut ParseHelper) -> Result<Node> {
   check_token!(ph, TT::Let | TT::Export);
 
   let r#type = match ph.peek(0) {
     Some(TT::Let) => Type::Let,
     Some(TT::Export) => Type::Export,
-    Some(_) => return Err(Error::unexpected(ph)),
-    None => return Err(Error::end(ph)),
+    Some(_) => return Err(error::unexpected(ph)),
+    None => return Err(error::end(ph)),
   };
 
   ph.advance();
 
   let name = match ph.peek(0) {
     Some(TT::Identifier(name)) => name.clone(),
-    Some(_) => return Err(Error::unexpected(ph)),
-    None => return Err(Error::end(ph)),
+    Some(_) => return Err(error::unexpected(ph)),
+    None => return Err(error::end(ph)),
   };
 
   // if ph.variables.get(&name).is_some() {

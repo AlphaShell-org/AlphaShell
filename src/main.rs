@@ -9,6 +9,7 @@ use std::{
   time::Instant,
 };
 
+use anyhow::{Context, Result};
 use clap::{ArgAction, Parser};
 
 mod types;
@@ -179,6 +180,7 @@ fn run_for_file(
 
     let tokens = tokenize(&contents).unwrap_or_else(|e| error!("{e}"));
     let tree = parse(&tokens).unwrap_or_else(|e| error!("{e}"));
+    dbg!(tree);
     let code = transpile(&tree).unwrap_or_else(|e| error!("{e}"));
 
     if args.executable {
