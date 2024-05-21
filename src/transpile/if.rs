@@ -132,8 +132,7 @@ pub fn transpile_let(t: &mut Transpiler, node: &Node) -> TranspileResult<String>
         "
 {temp_name}(){{
   local {name}
-  {name}=$({call})
-  if [ $? = 0 ]; then
+  if {name}=$({call}); then
 {block}
   else
 {else_block}
@@ -146,8 +145,7 @@ pub fn transpile_let(t: &mut Transpiler, node: &Node) -> TranspileResult<String>
         "
 {temp_name}(){{
   local {name}
-  {name}=$({call})
-  if [ $? = 0 ]; then
+  if {name}=$({call}); then
 {block}
   fi
 }}

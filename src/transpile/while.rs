@@ -47,11 +47,7 @@ pub fn transpile_let(t: &mut Transpiler, node: &Node) -> TranspileResult<String>
       "
 {temp_name}(){{
   local {name}
-  while true; do
-    {name}=$({call})
-    if [ ! $? = 0 ]; then
-      break
-    fi
+  while {name}=$({call}); do
 {block}
   done
 }}
