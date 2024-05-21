@@ -126,7 +126,7 @@ fn parse_single(ph: &mut ParseHelper) -> ParserResult<Value> {
     }
 
     Some(TT::Identifier(name)) => {
-      if ph.variables.get(name).is_none() {
+      if !ph.variables.contains(name) {
         return Err(Error::undefined_variable(ph));
       }
 

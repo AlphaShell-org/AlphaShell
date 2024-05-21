@@ -10,13 +10,14 @@ pub fn parse(ph: &mut ParseHelper) -> ParserResult<Node> {
   ph.advance();
 
   let value = if let Some(TT::Integer(int)) = ph.peek(0) {
-    let int = *int;
-    if int < 0 && int >= 256 {
+    if !(0..256).contains(int) {
       return Err(Error::new(
         &format!("Invalid return value: {int}"),
         ph.get(0),
       ));
     }
+
+    let int = *int;
 
     ph.advance();
 
