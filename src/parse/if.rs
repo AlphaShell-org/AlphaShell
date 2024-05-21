@@ -15,9 +15,6 @@ pub enum Else {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct Elif(Node, Node);
-
-#[derive(Debug, PartialEq, Clone)]
 pub struct If {
   pub condition: Value,
   pub block: Block,
