@@ -1,9 +1,5 @@
-use rand::{distributions::Alphanumeric, Rng};
+use rand::distributions::{Alphanumeric, DistString};
 
 pub fn random_string(n: usize) -> String {
-  rand::thread_rng()
-    .sample_iter(&Alphanumeric)
-    .take(n)
-    .map(char::from)
-    .collect()
+  Alphanumeric.sample_string(&mut rand::thread_rng(), n)
 }
